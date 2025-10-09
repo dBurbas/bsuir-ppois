@@ -1,2 +1,4 @@
 # Ignore MacOS system files
 .DS_Store
+# Ignore Xcode project file
+*.xcodeproj
