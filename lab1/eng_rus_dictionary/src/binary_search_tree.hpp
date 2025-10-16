@@ -47,8 +47,8 @@ private:
     struct Node {
         KeyType key;
         ValueType value;
-        Node* left_child = nullptr;
-        Node* right_child = nullptr;
+        Node* left = nullptr;
+        Node* right = nullptr;
     };
     Node* root_;
     size_t size_;
