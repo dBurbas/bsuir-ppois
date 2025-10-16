@@ -31,18 +31,35 @@ public:
         ClearHelper(root_);
     }
 
+    bool operator==(const BinarySearchTree& other) const {
+        if (size_ != other.size_) return false;
+        return EqualsHelper(root_, other.root_);
+    }
+    bool operator!=(const BinarySearchTree& other) const {
+        return !(*this == other);
+    }
+    bool Insert(const KeyType& key, const ValueType& value) {
+        return InsertHelper(key, value);
+    }
+    const ValueType* Find(const KeyType& key) const {
+        Node* found = FindNode(key);
+        if (found) return &found->value;
+        return nullptr;
+    }
+    bool Erase(const KeyType& key) {
+        bool erased = false;
+        root_ = EraseHelper(root_, key, erased);
+        if (erased) --size_;
+        return erased;
+    }
+    void Clear() {
+        ClearHelper(root_);
+        root_ = nullptr;
+        size_ = 0;
+    }
+    bool IsEmpty() const { return root_ == nullptr; }
     
-    const ValueType* Find(const KeyType& key) const;
-    
-    bool Erase(const KeyType& key);
-    
-    void Clear();
-    
-    void PrintInOrder() const;
-    
-    bool IsEmpty() const;
-    
-    size_t GetSize() const;
+    size_t GetSize() const { return size_; }
     
 private:
     struct Node {
