@@ -14,22 +14,23 @@
 template <typename KeyType, typename ValueType>
 class BinarySearchTree {
 public:
-    BinarySearchTree(){};
+    BinarySearchTree() = default;
     
-    BinarySearchTree(const BinarySearchTree& other);
-    BinarySearchTree& operator=(const BinarySearchTree& other);
-    
-    ~BinarySearchTree();
-    
-    bool operator==(const BinarySearchTree& other) const;
-    
-    bool operator!=(const BinarySearchTree& other) const;
-    
-    bool Insert(const KeyType& key, const ValueType& value);
-    
-    friend std::ostream& operator<<(std::ostream& out_stream, const BinarySearchTree& tree);
-    
-    friend std::istream& operator>>(std::ostream& in_stream, BinarySearchTree& tree);
+    BinarySearchTree(const BinarySearchTree& other) : root_(CopyHelper(other.root_)), size_(other.size_) {}
+    BinarySearchTree& operator=(const BinarySearchTree& other) {
+        if (this == &other) {
+            return *this;
+        }
+        ClearHelper(root_);
+        root_ = CopyHelper(other.root_);
+        size_ = other.size_;
+        
+        return *this;
+    }
+    ~BinarySearchTree() {
+        ClearHelper(root_);
+    }
+
     
     const ValueType* Find(const KeyType& key) const;
     
