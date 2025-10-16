@@ -11,9 +11,8 @@
 #include <cstddef>
 #include <iostream>
 
-template <typename KeyType,typename ValueType>
-
-class BinarySearchTree{
+template <typename KeyType, typename ValueType>
+class BinarySearchTree {
 public:
     BinarySearchTree(){};
     
@@ -45,7 +44,7 @@ public:
     size_t GetSize() const;
     
 private:
-    struct Node{
+    struct Node {
         KeyType key;
         ValueType value;
         Node* left_child = nullptr;
