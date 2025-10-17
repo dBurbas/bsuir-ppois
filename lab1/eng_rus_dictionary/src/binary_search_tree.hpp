@@ -68,14 +68,8 @@ private:
         Node* left = nullptr;
         Node* right = nullptr;
     };
-    Node* root_;
-    size_t size_;
-    
-    void ClearHelper(Node* node);
-    
-    Node* CopyHelper(const Node* node);
-    
-    void PrintInOrderHelper(const Node* node) const;
+    Node* root_ = nullptr;
+    size_t size_ = 0;
     
     Node* EraseHelper(Node* node, const KeyType& key, bool& erased);
     
