@@ -71,9 +71,13 @@ private:
     Node* root_ = nullptr;
     size_t size_ = 0;
     
-    Node* EraseHelper(Node* node, const KeyType& key, bool& erased);
-    
+    Node* CopyHelper(const Node* other);
     bool EqualsHelper(const Node* node1, const Node* node2) const;
+    bool InsertHelper(const KeyType& key, const ValueType& value);
+    Node* FindNode(const KeyType& key) const;
+    Node* EraseHelper(Node* node, const KeyType& key, bool& erased);
+    std::ostream& InOrderHelper(std::ostream& out, const Node* node) const;
+    void ClearHelper(Node* node);
 };
 
 #endif // BINARY_SEARCH_TREE_HPP
