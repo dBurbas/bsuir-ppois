@@ -42,13 +42,13 @@ public:
     friend std::ostream& operator<<(std::ostream& out_stream, const Dictionary& dict);
     friend std::istream& operator>>(std::istream& in_stream, Dictionary& dict);
     
-    void Clear(){
+    void Clear() {
         container_.Clear();
     }
     size_t GetSize() const {
         return container_.GetSize();
     }
-    bool IsEmpty() const{
+    bool IsEmpty() const {
         return container_.IsEmpty();
     }
     bool LoadFromFile(const std::string& filename);
