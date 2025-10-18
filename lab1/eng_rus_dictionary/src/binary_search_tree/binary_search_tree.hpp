@@ -39,7 +39,9 @@ public:
         return !(*this == other);
     }
     bool Insert(const KeyType& key, const ValueType& value) {
-        return InsertHelper(key, value);
+        size_t old_size = size_;
+        InsertHelper(key, value);
+        return size_ > old_size;
     }
     const ValueType* Find(const KeyType& key) const {
         Node* found = FindNode(key);
@@ -88,7 +90,7 @@ private:
                 EqualsHelper(node1->left, node2->left) &&
                 EqualsHelper(node1->right, node2->right);
     }
-    bool InsertHelper(const KeyType& key, const ValueType& value);
+    Node* InsertHelper(const KeyType& key, const ValueType& value);
     Node* FindNode(const KeyType& key) const;
     Node* EraseHelper(Node* node, const KeyType& key, bool& erased);
     std::ostream& InOrderHelper(std::ostream& out, const Node* node) const {
@@ -108,18 +110,19 @@ private:
 };
 
 template <typename KeyType, typename ValueType>
-bool BinarySearchTree<KeyType, ValueType>::InsertHelper(const KeyType& key, const ValueType& value){
+typename BinarySearchTree<KeyType, ValueType>::Node*
+BinarySearchTree<KeyType, ValueType>::InsertHelper(const KeyType& key, const ValueType& value){
     if (!root_) {
         root_ = new Node{key, value};
         ++size_;
-        return true;
+        return root_;
     }
     Node* current = root_;
     Node* parent = nullptr;
     while (current) {
         if (key == current->key) {
             current->value = value;
-            return false;
+            return current;
         } else if (key < current->key) {
             parent = current;
             current = current->left;
@@ -135,7 +138,7 @@ bool BinarySearchTree<KeyType, ValueType>::InsertHelper(const KeyType& key, cons
         parent->right = added_node;
     }
     ++size_;
-    return true;
+    return added_node;
 }
 template <typename KeyType, typename ValueType>
 typename BinarySearchTree<KeyType, ValueType>::Node*
