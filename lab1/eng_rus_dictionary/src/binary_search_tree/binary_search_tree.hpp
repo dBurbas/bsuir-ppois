@@ -21,10 +21,10 @@ public:
         if (this == &other) {
             return *this;
         }
+        Node* copied = CopyHelper(other.root_);
         ClearHelper(root_);
-        root_ = CopyHelper(other.root_);
+        root_ = copied;
         size_ = other.size_;
-        
         return *this;
     }
     ~BinarySearchTree() {
