@@ -32,15 +32,25 @@ public:
     const std::string& operator[](const std::string& english_word) const;
     std::string& operator[](const std::string& english_word);
     
-    bool operator==(const Dictionary& other) const;
-    bool operator!=(const Dictionary& other) const;
+    bool operator==(const Dictionary& other) const {
+        return container_ == other.container_;
+    }
+    bool operator!=(const Dictionary& other) const {
+        return !(*this == other);
+    }
     
     friend std::ostream& operator<<(std::ostream& out_stream, const Dictionary& dict);
     friend std::istream& operator>>(std::istream& in_stream, Dictionary& dict);
     
-    void Clear();
-    size_t GetSize() const;
-    bool IsEmpty() const;
+    void Clear(){
+        container_.Clear();
+    }
+    size_t GetSize() const {
+        return container_.GetSize();
+    }
+    bool IsEmpty() const{
+        return container_.IsEmpty();
+    }
     bool LoadFromFile(const std::string& filename);
 private:
     BinarySearchTree<std::string, std::string> container_;
