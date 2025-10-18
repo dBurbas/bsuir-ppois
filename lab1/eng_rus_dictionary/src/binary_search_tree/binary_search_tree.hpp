@@ -110,7 +110,7 @@ private:
     std::ostream& InOrderHelper(std::ostream& out, const Node* node) const {
         if (node) {
             InOrderHelper(out, node->left);
-            out << node->key << ":" << node->value;
+            out << node->key << ":" << node->value << "\n";
             InOrderHelper(out, node->right);
         }
         return out;
