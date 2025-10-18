@@ -107,4 +107,88 @@ private:
     }
 };
 
+template <typename KeyType, typename ValueType>
+bool BinarySearchTree<KeyType, ValueType>::InsertHelper(const KeyType& key, const ValueType& value){
+    if (!root_) {
+        root_ = new Node{key, value};
+        ++size_;
+        return true;
+    }
+    Node* current = root_;
+    Node* parent = nullptr;
+    while (current) {
+        if (key == current->key) {
+            current->value = value;
+            return false;
+        } else if (key < current->key) {
+            parent = current;
+            current = current->left;
+        } else {
+            parent = current;
+            current = current->right;
+        }
+    }
+    Node* added_node = new Node{key, value};
+    if (key < parent->key) {
+        parent->left = added_node;
+    } else {
+        parent->right = added_node;
+    }
+    ++size_;
+    return true;
+}
+template <typename KeyType, typename ValueType>
+typename BinarySearchTree<KeyType, ValueType>::Node*
+BinarySearchTree<KeyType, ValueType>::FindNode(const KeyType& key) const {
+    Node* current = root_;
+    while (current) {
+        if (key == current->key) {
+            return current;
+        } else if (key < current->key) {
+            current = current->left;
+        } else {
+            current = current->right;
+        }
+    }
+    return nullptr;
+}
+template <typename KeyType, typename ValueType>
+typename BinarySearchTree<KeyType, ValueType>::Node*
+BinarySearchTree<KeyType, ValueType>::EraseHelper(Node* node, const KeyType& key, bool& erased) {
+    if (node == nullptr) return nullptr;
+    if (key < node->key) {
+        node->left = EraseHelper(node->left, key, erased);
+    } else if (key > node->key) {
+        node->right = EraseHelper(node->right, key, erased);
+    } else {
+        erased = true;
+        Node* swap_node = node->right;
+        if (!node->left) {
+            delete node;
+            return swap_node;
+        }
+        if (!node->right) {
+            swap_node = node->left;
+            delete node;
+            return swap_node;
+        }
+        Node* swap_node_parent = node;
+        while (swap_node->left) {
+            swap_node_parent = swap_node;
+            swap_node = swap_node->left;
+        }
+        if (swap_node == node->right) {
+            swap_node->left = node->left;
+            delete node;
+            return swap_node;
+        }
+        swap_node_parent->left = swap_node->right;
+        swap_node->left = node->left;
+        swap_node->right = node->right;
+        delete node;
+        return swap_node;
+    }
+    return node;
+}
+
 #endif // BINARY_SEARCH_TREE_HPP
