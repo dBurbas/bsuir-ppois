@@ -76,7 +76,10 @@ public:
     bool IsEmpty() const { return root_ == nullptr; }
     
     size_t GetSize() const { return size_; }
-    
+    template<typename Func>
+    void InOrderTraversal(Func func) const {
+        InOrderHelper(root_, func);
+    }
 private:
     struct Node {
         KeyType key;
@@ -107,13 +110,13 @@ private:
     Node* InsertHelper(const KeyType& key, const ValueType& value);
     Node* FindNode(const KeyType& key) const;
     Node* EraseHelper(Node* node, const KeyType& key, bool& erased);
-    std::ostream& InOrderHelper(std::ostream& out, const Node* node) const {
+    template<typename Func>
+    void InOrderHelper(Node* node, Func func) const {
         if (node) {
-            InOrderHelper(out, node->left);
-            out << node->key << ":" << node->value << "\n";
-            InOrderHelper(out, node->right);
+            InOrderHelper(node->left, func);
+            func(node->key, node->value);
+            InOrderHelper(node->right, func);
         }
-        return out;
     }
     void ClearHelper(Node* node) {
         if (node == nullptr) return;
