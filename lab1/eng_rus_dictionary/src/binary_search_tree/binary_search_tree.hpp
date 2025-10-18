@@ -30,7 +30,21 @@ public:
     ~BinarySearchTree() {
         ClearHelper(root_);
     }
-
+    ValueType& operator[](const KeyType& key){
+        Node *node = FindNode(key);
+        if (!node) {
+            ValueType default_value{};
+            node = InsertHelper(key, default_value);
+        }
+        return node->value;
+    }
+    const ValueType& operator[](const KeyType& key) const{
+        Node *found = FindNode(key);
+        if (!found) {
+            throw std::out_of_range("Key not found");
+        }
+        return found->value;
+    }
     bool operator==(const BinarySearchTree& other) const {
         if (size_ != other.size_) return false;
         return EqualsHelper(root_, other.root_);
