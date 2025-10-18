@@ -1,6 +1,7 @@
 # Ignore MacOS system files
 .DS_Store
-# Ignore Xcode project file
+# Ignore Xcode project and VScode files
 *.xcodeproj
+*.vscode
 # Ignore documentation folder
 docs/
