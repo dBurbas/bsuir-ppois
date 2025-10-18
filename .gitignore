@@ -2,3 +2,5 @@
 .DS_Store
 # Ignore Xcode project file
 *.xcodeproj
+# Ignore documentation folder
+docs/
