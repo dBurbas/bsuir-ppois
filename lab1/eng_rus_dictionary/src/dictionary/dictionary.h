@@ -11,6 +11,7 @@
 #include <cstddef>
 #include <iostream>
 #include <string>
+#include <utility>
 #include "../binary_search_tree/binary_search_tree.hpp"
 
 class Dictionary {
