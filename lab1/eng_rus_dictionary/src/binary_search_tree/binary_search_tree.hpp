@@ -71,13 +71,40 @@ private:
     Node* root_ = nullptr;
     size_t size_ = 0;
     
-    Node* CopyHelper(const Node* other);
-    bool EqualsHelper(const Node* node1, const Node* node2) const;
+    Node* CopyHelper(const Node* other) {
+        if (!other) return nullptr;
+        Node* copied = new Node;
+        copied->key = other->key;
+        copied->value = other->value;
+        copied->left = CopyHelper(other->left);
+        copied->right = CopyHelper(other->right);
+        return copied;
+    }
+    bool EqualsHelper(const Node* node1, const Node* node2) const {
+        if (!node1 && !node2) return true;
+        if (!node1 || !node2) return false;
+        return node1->key == node2->key &&
+                node1->value == node2->value &&
+                EqualsHelper(node1->left, node2->left) &&
+                EqualsHelper(node1->right, node2->right);
+    }
     bool InsertHelper(const KeyType& key, const ValueType& value);
     Node* FindNode(const KeyType& key) const;
     Node* EraseHelper(Node* node, const KeyType& key, bool& erased);
-    std::ostream& InOrderHelper(std::ostream& out, const Node* node) const;
-    void ClearHelper(Node* node);
+    std::ostream& InOrderHelper(std::ostream& out, const Node* node) const {
+        if (node) {
+            InOrderHelper(out, node->left);
+            out << node->key << ":" << node->value;
+            InOrderHelper(out, node->right);
+        }
+        return out;
+    }
+    void ClearHelper(Node* node) {
+        if (node == nullptr) return;
+        ClearHelper(node->left);
+        ClearHelper(node->right);
+        delete node;
+    }
 };
 
 #endif // BINARY_SEARCH_TREE_HPP
