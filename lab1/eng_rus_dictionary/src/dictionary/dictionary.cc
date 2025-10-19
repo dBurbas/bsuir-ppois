@@ -1,14 +1,24 @@
-//
-//  dictionary.cc
-//  eng_rus_dictionary
-//
-//  Created by Dmitry Burbas on 17/10/2025.
-//
+/**
+ * @file dictionary.cc
+ * @brief Implementation of Dictionary class methods
+ * @author Dmitry Burbas
+ * @date 17/10/2025
+ */
+
 #include "dictionary.h"
 #include <sstream>
 #include <fstream>
 #include <stdexcept>
+
 namespace {
+/**
+ * @brief Checks if a string contains only English letters.
+ * 
+ * Allows hyphens within the word. Empty strings return false.
+ * 
+ * @param word String to check
+ * @return true if word contains only ASCII letters and hyphens
+ */
 bool IsEnglishWord(const std::string& word) {
     if (word.empty()) {
         return false;
@@ -21,7 +31,14 @@ bool IsEnglishWord(const std::string& word) {
     }
     return true;
 }
-
+/**
+ * @brief Checks if a string contains only Russian letters.
+ * 
+ * Allows hyphens within the word. Empty strings return false.
+ * 
+ * @param word String to check
+ * @return true if word contains only non-ASCII letters and hyphens
+ */
 bool IsRussianWord(const std::string& word) {
     if (word.empty()) {
         return false;
@@ -32,12 +49,18 @@ bool IsRussianWord(const std::string& word) {
     }
     return true;
 }
+/**
+ * @brief Parses a colon-separated word pair.
+ * @param english Output parameter for English word
+ * @param russian Output parameter for Russian word
+ * @param pair String in format "english:russian"
+ */
 void ParseWordPair(std::string& english, std::string& russian, const std::string& pair) {
     std::stringstream sstream(pair);
     std::getline(sstream, english, ':');
     std::getline(sstream, russian, ':');
 }
-}
+}   // anonymous namespace
 
 Dictionary::Dictionary(const Dictionary& other) : container_(other.container_) { }
 Dictionary& Dictionary::operator=(const Dictionary& other){
