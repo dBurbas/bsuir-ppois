@@ -6,61 +6,9 @@
  */
 
 #include "dictionary.h"
-#include <sstream>
+#include "../dictionary_utils/dictionary_utils.h"
 #include <fstream>
 #include <stdexcept>
-
-namespace {
-/**
- * @brief Checks if a string contains only English letters.
- * 
- * Allows hyphens within the word. Empty strings return false.
- * 
- * @param word String to check
- * @return true if word contains only ASCII letters and hyphens
- */
-bool IsEnglishWord(const std::string& word) {
-    if (word.empty()) {
-        return false;
-    }
-    for (unsigned char c : word) {
-        if(c == '-') continue;
-        if (!std::isalpha(c) || c>127) {
-            return false;
-        }
-    }
-    return true;
-}
-/**
- * @brief Checks if a string contains only Russian letters.
- * 
- * Allows hyphens within the word. Empty strings return false.
- * 
- * @param word String to check
- * @return true if word contains only non-ASCII letters and hyphens
- */
-bool IsRussianWord(const std::string& word) {
-    if (word.empty()) {
-        return false;
-    }
-    for (unsigned char c : word) {
-        if (c == '-') continue;
-        if (c<128) return false;
-    }
-    return true;
-}
-/**
- * @brief Parses a colon-separated word pair.
- * @param english Output parameter for English word
- * @param russian Output parameter for Russian word
- * @param pair String in format "english:russian"
- */
-void ParseWordPair(std::string& english, std::string& russian, const std::string& pair) {
-    std::stringstream sstream(pair);
-    std::getline(sstream, english, ':');
-    std::getline(sstream, russian, ':');
-}
-}   // anonymous namespace
 
 Dictionary::Dictionary(const Dictionary& other) : container_(other.container_) { }
 Dictionary& Dictionary::operator=(const Dictionary& other){
@@ -70,10 +18,10 @@ Dictionary& Dictionary::operator=(const Dictionary& other){
 }
 
 Dictionary& Dictionary::operator+=(const std::pair<std::string, std::string>& word_pair) {
-    if (!IsEnglishWord(word_pair.first)) {
+    if (!utils::IsEnglishWord(word_pair.first)) {
         throw std::invalid_argument("Invalid argument format: first word must be english");
     }
-    if (!IsRussianWord(word_pair.second)) {
+    if (!utils::IsRussianWord(word_pair.second)) {
         throw std::invalid_argument("Invalid argument format: second word must be russian");
     }
     container_.Insert(word_pair.first, word_pair.second);
@@ -81,11 +29,11 @@ Dictionary& Dictionary::operator+=(const std::pair<std::string, std::string>& wo
 }
 Dictionary& Dictionary::operator+=(const std::string& word_pair) {
     std::string english_word, russian_word;
-    ParseWordPair(english_word, russian_word, word_pair);
-    if (!IsEnglishWord(english_word)) {
+    utils::ParseWordPair(english_word, russian_word, word_pair);
+    if (!utils::IsEnglishWord(english_word)) {
         throw std::invalid_argument("Invalid argument format: first word must be english");
     }
-    if (!IsRussianWord(russian_word)) {
+    if (!utils::IsRussianWord(russian_word)) {
         throw std::invalid_argument("Invalid argument format: second word must be russian");
     }
     container_.Insert(english_word, russian_word);
@@ -96,7 +44,7 @@ Dictionary& Dictionary::operator+=(const char* word_pair) {
 }
 
 Dictionary& Dictionary::operator-=(const std::string& english_word) {
-    if (!IsEnglishWord(english_word)) {
+    if (!utils::IsEnglishWord(english_word)) {
         throw std::invalid_argument("Invalid argument format: word must be english");
     }
     if (!container_.Erase(english_word)) {
@@ -109,13 +57,13 @@ Dictionary& Dictionary::operator-=(const char* english_word) {
 }
 
 const std::string& Dictionary::operator[](const std::string& english_word) const {
-    if (!IsEnglishWord(english_word)) {
+    if (!utils::IsEnglishWord(english_word)) {
         throw std::invalid_argument("Invalid argument format: word must be english");
     }
     return container_[english_word];
 }
 std::string& Dictionary::operator[](const std::string& english_word) {
-    if (!IsEnglishWord(english_word)) {
+    if (!utils::IsEnglishWord(english_word)) {
         throw std::invalid_argument("Invalid argument format: word must be english");
     }
     return container_[english_word];
