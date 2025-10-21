@@ -7,8 +7,8 @@
 
 #include <string>
 
-#define ASCII_BORDER 127
-#define WORD_PAIR_DELIMETER ':'
+#define ASCII_BORDER 127 ///< Macros for border of ASCII symbols
+#define WORD_PAIR_DELIMETER ':' ///< Macros for word delimete of pair word delimeter translation
 namespace utils{
 
 /**
