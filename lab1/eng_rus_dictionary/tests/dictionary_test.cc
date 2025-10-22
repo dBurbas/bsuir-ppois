@@ -210,7 +210,7 @@ TEST_F(DictionaryFixture, CopyAssignmentOperatorEmpty){
 }
 TEST_F(DictionaryFixture, InputOperator) {
     Dictionary dict;
-    std::ifstream text_file(INPUT_FILE_PATH);
+    std::ifstream text_file(DICTIONARY_INPUT_FILE_PATH);
     if (!text_file) {
         throw std::runtime_error("Error: cannot open file");
     }
@@ -219,7 +219,7 @@ TEST_F(DictionaryFixture, InputOperator) {
     ASSERT_TRUE(dict == test_dict);
 }
 TEST_F(DictionaryFixture, OutputOperatorInFile) {
-    std::ofstream text_file(OUTPUT_FILE_PATH);
+    std::ofstream text_file(DICTIONARY_OUTPUT_FILE_PATH);
     if (!text_file) {
         throw std::runtime_error("Error: cannot open file");
     }
@@ -228,15 +228,15 @@ TEST_F(DictionaryFixture, OutputOperatorInFile) {
 }
 TEST_F(DictionaryFixture, LoadFromFileNonEmptyFile) {
     Dictionary dict;
-    ASSERT_TRUE(dict.LoadFromFile(INPUT_FILE_PATH));
+    ASSERT_TRUE(dict.LoadFromFile(DICTIONARY_INPUT_FILE_PATH));
     ASSERT_TRUE(dict == test_dict);
 }
 
 TEST(DictionaryNonFixture, LoadFromFileEmptyFile) {
     Dictionary dict;
-    ASSERT_TRUE(dict.LoadFromFile(INPUT_EMPTY_FILE_PATH));
+    ASSERT_TRUE(dict.LoadFromFile(DICTIONARY_INPUT_EMPTY_FILE_PATH));
     ASSERT_TRUE(dict.IsEmpty());
-    std::ifstream empty_file(INPUT_EMPTY_FILE_PATH);
+    std::ifstream empty_file(DICTIONARY_INPUT_EMPTY_FILE_PATH);
     if (!empty_file) {
         throw std::runtime_error("Error: cannot open file");
     }
