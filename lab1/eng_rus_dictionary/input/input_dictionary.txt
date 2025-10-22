@@ -1,0 +1,8 @@
+test:тест
+food:еда
+apple:яблоко
+mushroom:гриб
+programmer:программист
+Object-Oriented-Programming:Объектно-Ориентированное-Программирование
+mine:добывать
+craft:ремесло
