@@ -63,6 +63,12 @@ public:
     /**
      * @brief Copy constructor. Creates a deep copy of another dictionary.
      * @param other Dictionary to copy from
+     * @code
+     * Dictionary dict1;
+     * dict1 += "hello:привет";
+     * Dictionary dict2(dict1);
+     * std::cout << dict2["hello"]; // Outputs: привет
+     * @endcode
      */
     Dictionary(const Dictionary& other);
 
@@ -70,6 +76,12 @@ public:
      * @brief Copy assignment operator.
      * @param other Dictionary to copy from
      * @return Reference to this dictionary
+     * @code
+     * Dictionary dict1;
+     * dict1 += "hello:привет";
+     * Dictionary dict2 = dict1;
+     * std::cout << dict2["hello"]; // Outputs: привет
+     * @endcode
      */
     Dictionary& operator=(const Dictionary& other);
     
@@ -86,7 +98,7 @@ public:
      * 
      * @param word_pair Pair of English word, Russian translation
      * @return Reference to this dictionary for chaining
-     * @throw std::invalid_argument if word format is invalid
+     * @throw std::invalid\_argument if word format is invalid
      */
     Dictionary& operator+=(const std::pair<std::string, std::string>& word_pair);
 
@@ -94,7 +106,13 @@ public:
      * @brief Adds a word pair from a string in format "english:russian".
      * @param word_pair String containing colon-separated word pair
      * @return Reference to this dictionary for chaining
-     * @throw std::invalid_argument if word format is invalid
+     * @throw std::invalid\_argument if word format is invalid
+     * @code
+     * Dictionary dict;
+     * std::string word_pair = "hello:привет";
+     * dict += word_pair;
+     * std::cout << dict["hello"]; // Outputs: привет
+     * @endcode
      */
     Dictionary& operator+=(const std::string& word_pair);
 
@@ -102,7 +120,14 @@ public:
      * @brief Adds a word pair from a C-string in format "english:russian".
      * @param word_pair C-string containing colon-separated word pair
      * @return Reference to this dictionary for chaining
-     * @throw std::invalid_argument if word format is invalid
+     * @throw std::invalid\_argument if word format is invalid
+     * @code
+     * Dictionary dict;
+     * dict += "hello:привет";
+     * dict += "world:мир";
+     * std::cout << dict["hello"]; // Outputs: привет
+     * std::cout << dict["world"]; // Outputs: мир
+     * @endcode
      */
     Dictionary& operator+=(const char* word_pair);
     
@@ -110,8 +135,15 @@ public:
      * @brief Removes a word pair from the dictionary.
      * @param english_word English word to remove
      * @return Reference to this dictionary for chaining
-     * @throw std::invalid_argument if word is not valid English
-     * @throw std::out_of_range if word not found
+     * @throw std::invalid\_argument if word is not valid English
+     * @throw std::out\_of\_range if word not found
+     * @code
+     * Dictionary dict;
+     * dict += "hello:привет";
+     * std::string word = "hello";
+     * dict -= word;
+     * std::cout << dict["word"]; // Outputs nothing
+     * @endcode
      */
     Dictionary& operator-=(const std::string& english_word);
 
@@ -119,8 +151,13 @@ public:
      * @brief Removes a word pair from the dictionary (C-string version).
      * @param english_word English word to remove
      * @return Reference to this dictionary for chaining
-     * @throw std::invalid_argument if word is not valid English
-     * @throw std::out_of_range if word not found
+     * @throw std::invalid\_argument if word is not valid English
+     * @throw std::out\_of\_range if word not found
+     * @code
+     * Dictionary dict;
+     * dict -= "hello";
+     * std::cout << dict["hello"]; // Outputs nothing
+     * @endcode
      */
     Dictionary& operator-=(const char* english_word);
     
@@ -128,8 +165,8 @@ public:
      * @brief Accesses translation of an English word (const version).
      * @param english_word English word to look up
      * @return Const reference to Russian translation
-     * @throw std::invalid_argument if word is not valid English
-     * @throw std::out_of_range if word not found
+     * @throw std::invalid\_argument if word is not valid English
+     * @throw std::out\_of\_range if word not found
      */
     const std::string& operator[](const std::string& english_word) const;
 
@@ -140,7 +177,12 @@ public:
      * 
      * @param english_word English word to look up or create
      * @return Reference to Russian translation
-     * @throw std::invalid_argument if word is not valid English
+     * @throw std::invalid\_argument if word is not valid English
+     * @code
+     * Dictionary dict;
+     * dict += "hello:привет";
+     * std::cout << dict["hello"]; // Outputs: привет
+     * @endcode
      */
     std::string& operator[](const std::string& english_word);
     
@@ -148,6 +190,10 @@ public:
      * @brief Equality comparison operator.
      * @param other Dictionary to compare with
      * @return true if dictionaries contain identical entries
+     * @code
+     * Dictionary dict1, dict2;
+     * if (dict1 == dict2) { std::cout << "equal"; } // Outputs: equal
+     * @endcode
      */
     bool operator==(const Dictionary& other) const {
         return container_ == other.container_;
@@ -157,6 +203,11 @@ public:
      * @brief Inequality comparison operator.
      * @param other Dictionary to compare with
      * @return true if dictionaries differ
+     * @code
+     * Dictionary dict1, dict2;
+     * dict1 += "hi:привет";
+     * if (dict1 != dict2) { std::cout << "not equal"; } // Outputs: not equal
+     * @endcode
      */
     bool operator!=(const Dictionary& other) const {
         return !(*this == other);
@@ -167,6 +218,17 @@ public:
      * @param out_stream Output stream
      * @param dict Dictionary to output
      * @return Reference to output stream
+     * @code
+     * Dictionary dict;
+     * dict += "hello:привет";
+     * std::ifstream text_file(output.txt);
+     * if (!text_file) {
+     *  throw std::runtime_error("Error: cannot open file");
+     * }
+     * text_file << dict; \\ Output file: hello:привет
+     * std::cout << dict; \\ Output in terminal: hello:привет
+     * text_file.close();
+     * @endcode
      */
     friend std::ostream& operator<<(std::ostream& out_stream, const Dictionary& dict);
 
@@ -178,6 +240,16 @@ public:
      * @param in_stream Input stream
      * @param dict Dictionary to populate
      * @return Reference to input stream
+     * @code
+     * Dictionary dict;
+     * std::ifstream text_file(input.txt); \\ Input file: hello:привет
+     * if (!text_file) {
+     *  throw std::runtime_error("Error: cannot open file");
+     * }
+     * text_file >> dict;
+     * text_file.close();
+     * std::cout << dict[hello]; \\ Outputs: привет
+     * @endcode
      */
     friend std::istream& operator>>(std::istream& in_stream, Dictionary& dict);
     
