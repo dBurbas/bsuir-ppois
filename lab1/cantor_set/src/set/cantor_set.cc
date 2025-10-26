@@ -88,7 +88,9 @@ bool CantorSet::operator[](const std::string& elem) const {
     if (IsSet(elem)) {
         try {
             CantorSet temp_set(elem);
-            return std::binary_search(elements_.begin(), elements_.end(), temp_set.ToString());
+            return std::binary_search(elements_.begin(), elements_.end(), temp_set.ToString(),[] (const std::string& str1,const std::string& str2) {
+                return (str1.size() < str2.size()) ||
+                (str1.size() == str2.size() && str1 < str2);});
         } catch (const std::invalid_argument&) {
             return false;
         }
@@ -97,7 +99,10 @@ bool CantorSet::operator[](const std::string& elem) const {
         if (normalized.size()!=1 || !std::isalnum(normalized[0])) {
             return false;
         }
-        return std::binary_search(elements_.begin(), elements_.end(), normalized);
+        return std::binary_search(elements_.begin(), elements_.end(), normalized,
+                                  [] (const std::string& str1,const std::string& str2) {
+            return (str1.size() < str2.size()) ||
+            (str1.size() == str2.size() && str1 < str2);});
     }
 }
 CantorSet CantorSet::operator+(const CantorSet& other) const {
@@ -166,8 +171,11 @@ CantorSet CantorSet::PowerSetBitMaskHelper() const {
                 subset.push_back(elements_[element_index]);
             }
         }
-        power_set.AddElement(ToStringHelper(subset));
+        std::string subset_str = ToStringHelper(subset);
+        power_set.elements_.push_back(subset_str);
     }
+    SortElements(power_set.elements_);
+    RemoveDuplicates(power_set.elements_);
     return power_set;
 }
 
