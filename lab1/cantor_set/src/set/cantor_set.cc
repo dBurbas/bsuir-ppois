@@ -5,303 +5,318 @@
  * @date 19/10/2025
  */
 #include "cantor_set.h"
-#include <stdexcept>
-#include <cctype>
 #include <algorithm>
+#include <cctype>
 #include <stack>
+#include <stdexcept>
 
-#define ERROR_INVALID_ATOMIC_ELEMENT_INPUT "Atomic element should be a letter or number 1-9"
+#define ERROR_INVALID_ATOMIC_ELEMENT_INPUT  \
+  "Atomic element should be a letter or number 1-9"
 #define ERROR_TOO_BIG_SET_SIZE "Set size is too big: >20"
 #define ERROR_INVALID_SET_NESTING "Invalid set nesting"
 #define ERROR_EXTRANEOUS_ELEMENT_DELIMETER "Extraneous: \",\" "
 #define ERROR_EMPTY_ARGUMENT "Argument must not be empty"
 #define ERROR_ARGUMENT_NOT_SET "Argument must be set"
-#define ERROR_TWO_ELEMENTS_IN_ONE "Extraneous element without delimeter example:\"ab\""
+#define ERROR_TWO_ELEMENTS_IN_ONE  \
+  "Extraneous element without delimeter example:\"ab\""
 #define ERROR_INVALID_SYMBOLS_IN_ELEMENT "Invalid symbols in element"
 #define OPEN_SET_BRACKET '{'
 #define CLOSE_SET_BRACKET '}'
 #define SET_ELEMENT_DELIMETER ','
 
-CantorSet::CantorSet(const std::string& set) {
-    elements_ = ParseElements(set);
-    NormalizeNestedSets(elements_);
+CantorSet::CantorSet(const std::string &set) {
+  elements_ = ParseElements(set);
+  NormalizeNestedSets(elements_);
+  SortElements(elements_);
+  RemoveDuplicates(elements_);
+}
+
+CantorSet::CantorSet(const char *set) {
+  elements_ = ParseElements(std::string(set));
+  NormalizeNestedSets(elements_);
+  SortElements(elements_);
+  RemoveDuplicates(elements_);
+}
+CantorSet &CantorSet::operator=(const CantorSet &other) {
+  if (this != &other) {
+    elements_ = other.elements_;
+  }
+  return *this;
+}
+
+std::string CantorSet::ToString() const { return ToStringHelper(elements_); }
+
+bool CantorSet::AddElement(const std::string &elem_to_add) {
+  std::string normalized;
+  if (IsSet(elem_to_add)) {
+    CantorSet temp_set(elem_to_add);
+    normalized = temp_set.ToString();
+  } else {
+    normalized = NormalizeString(elem_to_add);
+    if (normalized.size() != 1 || !std::isalnum(normalized[0])) {
+      throw std::invalid_argument(ERROR_INVALID_ATOMIC_ELEMENT_INPUT);
+    }
+  }
+  auto it = std::find(elements_.begin(), elements_.end(), normalized);
+  if (it == elements_.end()) {
+    elements_.push_back(normalized);
     SortElements(elements_);
-    RemoveDuplicates(elements_);
+    return true;
+  }
+  return false;
 }
 
-CantorSet::CantorSet(const char* set) {
-    elements_ = ParseElements(std::string(set));
-    NormalizeNestedSets(elements_);
-    SortElements(elements_);
-    RemoveDuplicates(elements_);
-}
-CantorSet& CantorSet::operator=(const CantorSet& other) {
-    if (this != &other) {
-        elements_ = other.elements_;
+bool CantorSet::EraseElement(const std::string &elem_to_erase) {
+  std::string normalized;
+  if (IsSet(elem_to_erase)) {
+    CantorSet temp_set(elem_to_erase);
+    normalized = temp_set.ToString();
+  } else {
+    normalized = NormalizeString(elem_to_erase);
+    if (normalized.size() != 1 || !std::isalnum(normalized[0])) {
+      throw std::invalid_argument(ERROR_INVALID_ATOMIC_ELEMENT_INPUT);
     }
-    return *this;
+  }
+  auto it = std::find(elements_.begin(), elements_.end(), normalized);
+  if (it != elements_.end() && *it == normalized) {
+    elements_.erase(it);
+    return true;
+  }
+  return false;
 }
 
-std::string CantorSet::ToString() const {
-    return ToStringHelper(elements_);
-}
-
-bool CantorSet::AddElement(const std::string& elem_to_add) {
-    std::string normalized;
-    if (IsSet(elem_to_add)) {
-        CantorSet temp_set(elem_to_add);
-        normalized = temp_set.ToString();
-    }else {
-        normalized = NormalizeString(elem_to_add);
-        if (normalized.size()!=1 || !std::isalnum(normalized[0])) {
-            throw std::invalid_argument(ERROR_INVALID_ATOMIC_ELEMENT_INPUT);
-        }
-    }
-    auto it = std::find(elements_.begin(), elements_.end(), normalized);
-    if (it == elements_.end()){
-        elements_.push_back(normalized);
-        SortElements(elements_);
-        return true;
-    }
-    return false;
-}
-
-bool CantorSet::EraseElement(const std::string& elem_to_erase) {
-    std::string normalized;
-    if (IsSet(elem_to_erase)) {
-        CantorSet temp_set(elem_to_erase);
-        normalized = temp_set.ToString();
-    } else {
-        normalized = NormalizeString(elem_to_erase);
-        if (normalized.size()!=1 || !std::isalnum(normalized[0])) {
-            throw std::invalid_argument(ERROR_INVALID_ATOMIC_ELEMENT_INPUT);
-        }
-    }
-    auto it = std::find(elements_.begin(), elements_.end(), normalized);
-    if (it != elements_.end() && *it == normalized){
-        elements_.erase(it);
-        return true;
-    }
-    return false;
-}
-
-bool CantorSet::Contains(const std::string& elem) {
-    return (*this)[elem];
-}
-bool CantorSet::operator[](const std::string& elem) const {
-    if (IsSet(elem)) {
-        try {
-            CantorSet temp_set(elem);
-            return std::binary_search(elements_.begin(), elements_.end(), temp_set.ToString(),[] (const std::string& str1,const std::string& str2) {
-                return (str1.size() < str2.size()) ||
-                (str1.size() == str2.size() && str1 < str2);});
-        } catch (const std::invalid_argument&) {
-            return false;
-        }
-    } else {
-        std::string normalized = NormalizeString(elem);
-        if (normalized.size()!=1 || !std::isalnum(normalized[0])) {
-            return false;
-        }
-        return std::binary_search(elements_.begin(), elements_.end(), normalized,
-                                  [] (const std::string& str1,const std::string& str2) {
+bool CantorSet::Contains(const std::string &elem) { return (*this)[elem]; }
+bool CantorSet::operator[](const std::string &elem) const {
+  if (IsSet(elem)) {
+    try {
+      CantorSet temp_set(elem);
+      return std::binary_search(
+          elements_.begin(), elements_.end(), temp_set.ToString(),
+          [](const std::string &str1, const std::string &str2) {
             return (str1.size() < str2.size()) ||
-            (str1.size() == str2.size() && str1 < str2);});
+                   (str1.size() == str2.size() && str1 < str2);
+          });
+    } catch (const std::invalid_argument &) {
+      return false;
     }
-}
-CantorSet CantorSet::operator+(const CantorSet& other) const {
-    CantorSet union_set(*this);
-    union_set += other;
-    return union_set;
-}
-
-CantorSet& CantorSet::operator+=(const CantorSet& other) {
-    for (const auto& elem : other.elements_) {
-        AddElement(elem);
+  } else {
+    std::string normalized = NormalizeString(elem);
+    if (normalized.size() != 1 || !std::isalnum(normalized[0])) {
+      return false;
     }
-    return *this;
+    return std::binary_search(
+        elements_.begin(), elements_.end(), normalized,
+        [](const std::string &str1, const std::string &str2) {
+          return (str1.size() < str2.size()) ||
+                 (str1.size() == str2.size() && str1 < str2);
+        });
+  }
+}
+CantorSet CantorSet::operator+(const CantorSet &other) const {
+  CantorSet union_set(*this);
+  union_set += other;
+  return union_set;
 }
 
-CantorSet CantorSet::operator*(const CantorSet& other) const {
-    CantorSet intersection_set(*this);
-    intersection_set *= other;
-    return intersection_set;
+CantorSet &CantorSet::operator+=(const CantorSet &other) {
+  for (const auto &elem : other.elements_) {
+    AddElement(elem);
+  }
+  return *this;
 }
 
-CantorSet& CantorSet::operator*=(const CantorSet& other) {
-    std::vector<std::string> elements_to_keep;
-    for (const auto& elem : elements_) {
-        if (other[elem]) elements_to_keep.push_back(elem);
-    }
-    elements_ = elements_to_keep;
-    return *this;
+CantorSet CantorSet::operator*(const CantorSet &other) const {
+  CantorSet intersection_set(*this);
+  intersection_set *= other;
+  return intersection_set;
 }
 
-CantorSet CantorSet::operator-(const CantorSet& other) const {
-    CantorSet difference_set(*this);
-    difference_set -= other;
-    return difference_set;
+CantorSet &CantorSet::operator*=(const CantorSet &other) {
+  std::vector<std::string> elements_to_keep;
+  for (const auto &elem : elements_) {
+    if (other[elem])
+      elements_to_keep.push_back(elem);
+  }
+  elements_ = elements_to_keep;
+  return *this;
 }
 
-CantorSet& CantorSet::operator-=(const CantorSet& other) {
-    std::vector<std::string> elements_to_keep;
-    for (const auto& elem : elements_) {
-        if (!other[elem]) elements_to_keep.push_back(elem);
-    }
-    elements_ = elements_to_keep;
-    return *this;
-}
-std::ostream& operator<<(std::ostream& out_stream, const CantorSet& set) {
-    out_stream << set.ToString();
-    return out_stream;
+CantorSet CantorSet::operator-(const CantorSet &other) const {
+  CantorSet difference_set(*this);
+  difference_set -= other;
+  return difference_set;
 }
 
-std::istream& operator>>(std::istream& in_stream, CantorSet& set) {
-    std::string input;
-    std::getline(in_stream, input);
-    set = CantorSet(input);
-    return in_stream;
+CantorSet &CantorSet::operator-=(const CantorSet &other) {
+  std::vector<std::string> elements_to_keep;
+  for (const auto &elem : elements_) {
+    if (!other[elem])
+      elements_to_keep.push_back(elem);
+  }
+  elements_ = elements_to_keep;
+  return *this;
+}
+std::ostream &operator<<(std::ostream &out_stream, const CantorSet &set) {
+  out_stream << set.ToString();
+  return out_stream;
+}
+
+std::istream &operator>>(std::istream &in_stream, CantorSet &set) {
+  std::string input;
+  std::getline(in_stream, input);
+  set = CantorSet(input);
+  return in_stream;
 }
 CantorSet CantorSet::PowerSetBitMaskHelper() const {
-    size_t set_size = elements_.size();
-    if (set_size > 20) throw std::length_error(ERROR_TOO_BIG_SET_SIZE);
-    CantorSet power_set;
-    size_t power_set_size = 1 << set_size; // 2^n
-    for (size_t mask = 0; mask < power_set_size; mask++) {
-        std::vector<std::string> subset;
-        
-        for (size_t element_index = 0; element_index < set_size; element_index++) {
-            if (mask & (1 << element_index)) {
-                subset.push_back(elements_[element_index]);
-            }
-        }
-        std::string subset_str = ToStringHelper(subset);
-        power_set.elements_.push_back(subset_str);
+  size_t set_size = elements_.size();
+  if (set_size > 20)
+    throw std::length_error(ERROR_TOO_BIG_SET_SIZE);
+  CantorSet power_set;
+  size_t power_set_size = 1 << set_size; // 2^n
+  for (size_t mask = 0; mask < power_set_size; mask++) {
+    std::vector<std::string> subset;
+
+    for (size_t element_index = 0; element_index < set_size; element_index++) {
+      if (mask & (1 << element_index)) {
+        subset.push_back(elements_[element_index]);
+      }
     }
-    SortElements(power_set.elements_);
-    RemoveDuplicates(power_set.elements_);
-    return power_set;
+    std::string subset_str = ToStringHelper(subset);
+    power_set.elements_.push_back(subset_str);
+  }
+  SortElements(power_set.elements_);
+  RemoveDuplicates(power_set.elements_);
+  return power_set;
 }
 
-bool CantorSet::IsSet(const std::string& str) const {
-    if (str.empty()) return false;
-    
-    size_t first = str.find_first_not_of(" \t\n\r");
-    if (first == std::string::npos) return false;
-    
-    size_t last = str.find_last_not_of(" \t\n\r");
-    return str[first] == OPEN_SET_BRACKET && str[last] == CLOSE_SET_BRACKET;
+bool CantorSet::IsSet(const std::string &str) const {
+  if (str.empty())
+    return false;
+
+  size_t first = str.find_first_not_of(" \t\n\r");
+  if (first == std::string::npos)
+    return false;
+
+  size_t last = str.find_last_not_of(" \t\n\r");
+  return str[first] == OPEN_SET_BRACKET && str[last] == CLOSE_SET_BRACKET;
 }
 
-void CantorSet::ValidateString(const std::string& str) const {
-    if (str.empty()) {
-        throw std::invalid_argument(ERROR_EMPTY_ARGUMENT);
-    }
-    if (!IsSet(str)) {
-        throw std::invalid_argument(ERROR_ARGUMENT_NOT_SET);
-    }
-    std::stack<char> stack_of_brackets;
-    for (size_t i=0; i<str.size(); i++) {
-        if (std::isspace(str[i])) {
-            continue;
-        } else if (str[i] == OPEN_SET_BRACKET){
-            stack_of_brackets.push(OPEN_SET_BRACKET);
-        } else if (str[i] == CLOSE_SET_BRACKET) {
-            if (stack_of_brackets.empty()) {
-                throw std::invalid_argument(ERROR_INVALID_SET_NESTING);
-            }
-            if (i >= 2 && str[i-2] == SET_ELEMENT_DELIMETER) {
-                throw std::invalid_argument(ERROR_EXTRANEOUS_ELEMENT_DELIMETER);
-            }
-            stack_of_brackets.pop();
-        } else if ( str[i] != SET_ELEMENT_DELIMETER && !std::isalnum(str[i]) && !std::isspace(str[i]) ) {
-            throw std::invalid_argument(ERROR_INVALID_SYMBOLS_IN_ELEMENT);
-        } else if (i > 0 && std::isalpha(str[i]) && std::isalpha(str[i-1])) {
-            throw std::invalid_argument(ERROR_TWO_ELEMENTS_IN_ONE);
-        }
-    }
-    if (!stack_of_brackets.empty()) {
+void CantorSet::ValidateString(const std::string &str) const {
+  if (str.empty()) {
+    throw std::invalid_argument(ERROR_EMPTY_ARGUMENT);
+  }
+  if (!IsSet(str)) {
+    throw std::invalid_argument(ERROR_ARGUMENT_NOT_SET);
+  }
+  std::stack<char> stack_of_brackets;
+  for (size_t i = 0; i < str.size(); i++) {
+    if (std::isspace(str[i])) {
+      continue;
+    } else if (str[i] == OPEN_SET_BRACKET) {
+      stack_of_brackets.push(OPEN_SET_BRACKET);
+    } else if (str[i] == CLOSE_SET_BRACKET) {
+      if (stack_of_brackets.empty()) {
         throw std::invalid_argument(ERROR_INVALID_SET_NESTING);
+      }
+      if (i >= 2 && str[i - 2] == SET_ELEMENT_DELIMETER) {
+        throw std::invalid_argument(ERROR_EXTRANEOUS_ELEMENT_DELIMETER);
+      }
+      stack_of_brackets.pop();
+    } else if (str[i] != SET_ELEMENT_DELIMETER && !std::isalnum(str[i]) &&
+               !std::isspace(str[i])) {
+      throw std::invalid_argument(ERROR_INVALID_SYMBOLS_IN_ELEMENT);
+    } else if (i > 0 && std::isalpha(str[i]) && std::isalpha(str[i - 1])) {
+      throw std::invalid_argument(ERROR_TWO_ELEMENTS_IN_ONE);
     }
-    
+  }
+  if (!stack_of_brackets.empty()) {
+    throw std::invalid_argument(ERROR_INVALID_SET_NESTING);
+  }
 }
 
-std::string CantorSet::NormalizeString(const std::string& str) const {
-    std::string normalized;
-    for (size_t i = 0; i < str.size(); i++) {
-        if (std::isspace(str[i])) {
-            continue;
-        }
-        if (str[i] == SET_ELEMENT_DELIMETER) {
-            if (normalized.size() > 2 && normalized[normalized.size()-2] == SET_ELEMENT_DELIMETER) continue;
-            normalized += ", ";
-        } else {
-            normalized += str[i];
-        }
+std::string CantorSet::NormalizeString(const std::string &str) const {
+  std::string normalized;
+  for (size_t i = 0; i < str.size(); i++) {
+    if (std::isspace(str[i])) {
+      continue;
     }
-    return normalized;
+    if (str[i] == SET_ELEMENT_DELIMETER) {
+      if (normalized.size() > 2 &&
+          normalized[normalized.size() - 2] == SET_ELEMENT_DELIMETER)
+        continue;
+      normalized += ", ";
+    } else {
+      normalized += str[i];
+    }
+  }
+  return normalized;
 }
 
-std::vector<std::string> CantorSet::ParseElements(const std::string& str) const {
-    std::string normalized = NormalizeString(str);
-    ValidateString(normalized);
-    
-    std::string content = normalized.substr(1, normalized.size()-2);
-    std::vector<std::string> parsed;
-    std::string element;
-    size_t level = 0;
-    for (size_t i = 0; i<content.size(); i++) {
-        char symbol = content[i];
-        element += symbol;
-        if (symbol == OPEN_SET_BRACKET) level++;
-        if (symbol == CLOSE_SET_BRACKET) level--;
-        
-        if (symbol == SET_ELEMENT_DELIMETER && level == 0) {
-            element.pop_back();
-            if (!element.empty()) {
-                parsed.push_back(element);
-                element.clear();
-            }
-            i++;
-        }
-    }
-    if (!element.empty()) {
+std::vector<std::string>
+CantorSet::ParseElements(const std::string &str) const {
+  std::string normalized = NormalizeString(str);
+  ValidateString(normalized);
+
+  std::string content = normalized.substr(1, normalized.size() - 2);
+  std::vector<std::string> parsed;
+  std::string element;
+  size_t level = 0;
+  for (size_t i = 0; i < content.size(); i++) {
+    char symbol = content[i];
+    element += symbol;
+    if (symbol == OPEN_SET_BRACKET)
+      level++;
+    if (symbol == CLOSE_SET_BRACKET)
+      level--;
+
+    if (symbol == SET_ELEMENT_DELIMETER && level == 0) {
+      element.pop_back();
+      if (!element.empty()) {
         parsed.push_back(element);
+        element.clear();
+      }
+      i++;
     }
-    
-    return parsed;
+  }
+  if (!element.empty()) {
+    parsed.push_back(element);
+  }
+
+  return parsed;
 }
-void CantorSet::NormalizeNestedSets(std::vector<std::string>& elements) const {
-    for (size_t i=0; i<elements.size(); i++) {
-        if (IsSet(elements[i])) {
-            std::vector<std::string> temp = ParseElements(elements[i]);
-            NormalizeNestedSets(temp);
-            SortElements(temp);
-            RemoveDuplicates(temp);
-            elements[i] = ToStringHelper(temp);
-        }
+void CantorSet::NormalizeNestedSets(std::vector<std::string> &elements) const {
+  for (size_t i = 0; i < elements.size(); i++) {
+    if (IsSet(elements[i])) {
+      std::vector<std::string> temp = ParseElements(elements[i]);
+      NormalizeNestedSets(temp);
+      SortElements(temp);
+      RemoveDuplicates(temp);
+      elements[i] = ToStringHelper(temp);
     }
+  }
 }
-void CantorSet::SortElements(std::vector<std::string>& elements) const {
-    std::sort(elements.begin(), elements.end(), [] (const std::string& str1,
-                                                   const std::string& str2) {
-        return (str1.size() < str2.size()) ||
-                (str1.size() == str2.size() && str1 < str2);
-    });
+void CantorSet::SortElements(std::vector<std::string> &elements) const {
+  std::sort(elements.begin(), elements.end(),
+            [](const std::string &str1, const std::string &str2) {
+              return (str1.size() < str2.size()) ||
+                     (str1.size() == str2.size() && str1 < str2);
+            });
 }
-void CantorSet::RemoveDuplicates(std::vector<std::string>& elements) const {
-    auto new_end = std::unique(elements.begin(), elements.end());
-    elements.erase(new_end,elements.end());
+void CantorSet::RemoveDuplicates(std::vector<std::string> &elements) const {
+  auto new_end = std::unique(elements.begin(), elements.end());
+  elements.erase(new_end, elements.end());
 }
 
-std::string CantorSet::ToStringHelper(const std::vector<std::string>& set) const {
-    if (set.empty()) return "{}";
-    std::string result = "{";
-    for (size_t i = 0; i < set.size(); i++) {
-        result += set[i];
-        if (i != set.size() - 1) result += ", ";
-    }
-    result += "}";
-    return result;
+std::string
+CantorSet::ToStringHelper(const std::vector<std::string> &set) const {
+  if (set.empty())
+    return "{}";
+  std::string result = "{";
+  for (size_t i = 0; i < set.size(); i++) {
+    result += set[i];
+    if (i != set.size() - 1)
+      result += ", ";
+  }
+  result += "}";
+  return result;
 }
-
