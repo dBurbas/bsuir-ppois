@@ -10,6 +10,18 @@
 #include <algorithm>
 #include <stack>
 
+#define ERROR_INVALID_ATOMIC_ELEMENT_INPUT "Atomic element should be a letter or number 1-9"
+#define ERROR_TOO_BIG_SET_SIZE "Set size is too big: >20"
+#define ERROR_INVALID_SET_NESTING "Invalid set nesting"
+#define ERROR_EXTRANEOUS_ELEMENT_DELIMETER "Extraneous: \",\" "
+#define ERROR_EMPTY_ARGUMENT "Argument must not be empty"
+#define ERROR_ARGUMENT_NOT_SET "Argument must be set"
+#define ERROR_TWO_ELEMENTS_IN_ONE "Extraneous element without delimeter example:\"ab\""
+#define ERROR_INVALID_SYMBOLS_IN_ELEMENT "Invalid symbols in element"
+#define OPEN_SET_BRACKET '{'
+#define CLOSE_SET_BRACKET '}'
+#define SET_ELEMENT_DELIMETER ','
+
 CantorSet::CantorSet(const std::string& set) {
     elements_ = ParseElements(set);
     NormalizeNestedSets(elements_);
@@ -37,16 +49,12 @@ std::string CantorSet::ToString() const {
 bool CantorSet::AddElement(const std::string& elem_to_add) {
     std::string normalized;
     if (IsSet(elem_to_add)) {
-        try {
-            CantorSet temp_set(elem_to_add);
-            normalized = temp_set.ToString();
-        } catch (const std::invalid_argument&) {
-            return false;
-        }
+        CantorSet temp_set(elem_to_add);
+        normalized = temp_set.ToString();
     }else {
         normalized = NormalizeString(elem_to_add);
         if (normalized.size()!=1 || !std::isalnum(normalized[0])) {
-            return false;
+            throw std::invalid_argument(ERROR_INVALID_ATOMIC_ELEMENT_INPUT);
         }
     }
     auto it = std::find(elements_.begin(), elements_.end(), normalized);
@@ -61,16 +69,12 @@ bool CantorSet::AddElement(const std::string& elem_to_add) {
 bool CantorSet::EraseElement(const std::string& elem_to_erase) {
     std::string normalized;
     if (IsSet(elem_to_erase)) {
-        try {
-            CantorSet temp_set(elem_to_erase);
-            normalized = temp_set.ToString();
-        } catch (const std::invalid_argument&) {
-            return false;
-        }
+        CantorSet temp_set(elem_to_erase);
+        normalized = temp_set.ToString();
     } else {
         normalized = NormalizeString(elem_to_erase);
         if (normalized.size()!=1 || !std::isalnum(normalized[0])) {
-            return false;
+            throw std::invalid_argument(ERROR_INVALID_ATOMIC_ELEMENT_INPUT);
         }
     }
     auto it = std::find(elements_.begin(), elements_.end(), normalized);
@@ -160,7 +164,7 @@ std::istream& operator>>(std::istream& in_stream, CantorSet& set) {
 }
 CantorSet CantorSet::PowerSetBitMaskHelper() const {
     size_t set_size = elements_.size();
-    if (set_size > 20) throw std::length_error("Set size is too big: >20");
+    if (set_size > 20) throw std::length_error(ERROR_TOO_BIG_SET_SIZE);
     CantorSet power_set;
     size_t power_set_size = 1 << set_size; // 2^n
     for (size_t mask = 0; mask < power_set_size; mask++) {
@@ -186,38 +190,38 @@ bool CantorSet::IsSet(const std::string& str) const {
     if (first == std::string::npos) return false;
     
     size_t last = str.find_last_not_of(" \t\n\r");
-    return str[first] == '{' && str[last] == '}';
+    return str[first] == OPEN_SET_BRACKET && str[last] == CLOSE_SET_BRACKET;
 }
 
 void CantorSet::ValidateString(const std::string& str) const {
     if (str.empty()) {
-        throw std::invalid_argument("Argument must not be empty");
+        throw std::invalid_argument(ERROR_EMPTY_ARGUMENT);
     }
     if (!IsSet(str)) {
-        throw std::invalid_argument("Argument must be set");
+        throw std::invalid_argument(ERROR_ARGUMENT_NOT_SET);
     }
     std::stack<char> stack_of_brackets;
     for (size_t i=0; i<str.size(); i++) {
         if (std::isspace(str[i])) {
             continue;
-        } else if (str[i] == '{') {
-            stack_of_brackets.push('{');
-        } else if (str[i] == '}') {
+        } else if (str[i] == OPEN_SET_BRACKET){
+            stack_of_brackets.push(OPEN_SET_BRACKET);
+        } else if (str[i] == CLOSE_SET_BRACKET) {
             if (stack_of_brackets.empty()) {
-                throw std::invalid_argument("Invalid set nesting");
+                throw std::invalid_argument(ERROR_INVALID_SET_NESTING);
             }
-            if (i >= 2 && str[i-2] == ',') {
-                throw std::invalid_argument("Extraneous: \",\" ");
+            if (i >= 2 && str[i-2] == SET_ELEMENT_DELIMETER) {
+                throw std::invalid_argument(ERROR_EXTRANEOUS_ELEMENT_DELIMETER);
             }
             stack_of_brackets.pop();
-        } else if ( str[i] != ',' && !std::isalnum(str[i]) && !std::isspace(str[i]) ) {
-            throw std::invalid_argument("Invalid symbols");
+        } else if ( str[i] != SET_ELEMENT_DELIMETER && !std::isalnum(str[i]) && !std::isspace(str[i]) ) {
+            throw std::invalid_argument(ERROR_INVALID_SYMBOLS_IN_ELEMENT);
         } else if (i > 0 && std::isalpha(str[i]) && std::isalpha(str[i-1])) {
-            throw std::invalid_argument("Invalid element syntax");
+            throw std::invalid_argument(ERROR_TWO_ELEMENTS_IN_ONE);
         }
     }
     if (!stack_of_brackets.empty()) {
-        throw std::invalid_argument("Invalid set nesting");
+        throw std::invalid_argument(ERROR_INVALID_SET_NESTING);
     }
     
 }
@@ -228,8 +232,8 @@ std::string CantorSet::NormalizeString(const std::string& str) const {
         if (std::isspace(str[i])) {
             continue;
         }
-        if (str[i] ==',') {
-            if (normalized.size() > 2 && normalized[normalized.size()-2] == ',') continue;
+        if (str[i] == SET_ELEMENT_DELIMETER) {
+            if (normalized.size() > 2 && normalized[normalized.size()-2] == SET_ELEMENT_DELIMETER) continue;
             normalized += ", ";
         } else {
             normalized += str[i];
@@ -249,10 +253,10 @@ std::vector<std::string> CantorSet::ParseElements(const std::string& str) const 
     for (size_t i = 0; i<content.size(); i++) {
         char symbol = content[i];
         element += symbol;
-        if (symbol == '{') level++;
-        if (symbol == '}') level--;
+        if (symbol == OPEN_SET_BRACKET) level++;
+        if (symbol == CLOSE_SET_BRACKET) level--;
         
-        if (symbol == ',' && level == 0) {
+        if (symbol == SET_ELEMENT_DELIMETER && level == 0) {
             element.pop_back();
             if (!element.empty()) {
                 parsed.push_back(element);
@@ -285,7 +289,7 @@ void CantorSet::SortElements(std::vector<std::string>& elements) const {
                 (str1.size() == str2.size() && str1 < str2);
     });
 }
-void CantorSet::RemoveDuplicates(std::vector<std::string>& elements) const{
+void CantorSet::RemoveDuplicates(std::vector<std::string>& elements) const {
     auto new_end = std::unique(elements.begin(), elements.end());
     elements.erase(new_end,elements.end());
 }
