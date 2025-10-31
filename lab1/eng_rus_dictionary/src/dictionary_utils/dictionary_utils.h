@@ -8,8 +8,9 @@
 #include <string>
 
 #define ASCII_BORDER 127 ///< Macros for border of ASCII symbols
-#define WORD_PAIR_DELIMETER ':' ///< Macros for word delimete of pair: word <delimeter> translation
-namespace utils{
+#define WORD_PAIR_DELIMETER   \
+  ':' ///< Macros for word delimete of pair: word <delimeter> translation
+namespace utils {
 
 /**
  * @brief Checks if a string contains only English letters.
@@ -19,7 +20,7 @@ namespace utils{
  * @param word String to check
  * @return true if word contains only ASCII letters and hyphens
  */
-bool IsEnglishWord(const std::string& word);
+bool IsEnglishWord(const std::string &word);
 
 /**
  * @brief Checks if a string contains only Russian letters.
@@ -29,7 +30,7 @@ bool IsEnglishWord(const std::string& word);
  * @param word String to check
  * @return true if word contains only non-ASCII letters and hyphens
  */
-bool IsRussianWord(const std::string& word);
+bool IsRussianWord(const std::string &word);
 
 /**
  * @brief Parses a colon-separated word pair.
@@ -37,6 +38,6 @@ bool IsRussianWord(const std::string& word);
  * @param russian Output parameter for Russian word
  * @param pair String in format "english:russian"
  */
-void ParseWordPair(std::string& english, std::string& russian,
-                const std::string& pair);
-}
+void ParseWordPair(std::string &english, std::string &russian,
+                   const std::string &pair);
+} // namespace utils
