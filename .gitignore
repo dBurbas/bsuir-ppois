@@ -5,3 +5,8 @@
 *.vscode
 # Ignore documentation folder
 docs/
+# Ignore files of Clion(.idea/)
+.idea/
+# Ignore coverage files
+*.profraw
+*.profdata
