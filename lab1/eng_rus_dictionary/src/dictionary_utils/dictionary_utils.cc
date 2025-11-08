@@ -14,7 +14,7 @@ bool utils::IsEnglishWord(const std::string &word) {
     return false;
   }
   for (unsigned char c : word) {
-    if (c == '-')
+    if (c == '-' || isspace(c))
       continue;
     if (!std::isalpha(c) || c > ASCII_BORDER) {
       return false;
@@ -27,7 +27,7 @@ bool utils::IsRussianWord(const std::string &word) {
     return false;
   }
   for (unsigned char c : word) {
-    if (c == '-')
+    if (c == '-' || isspace(c))
       continue;
     if (c <= ASCII_BORDER)
       return false;
