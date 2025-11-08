@@ -64,6 +64,23 @@ TEST_F(DictionaryFixture, ConstFindOperatorNonExisting) {
   ASSERT_THROW(const_dict["monday"], std::out_of_range);
   ASSERT_THROW(const_dict["frost"], std::out_of_range);
 }
+TEST_F(DictionaryFixture, ConstOperatorExisting) {
+  const Dictionary const_dict(test_dict);
+  ASSERT_EQ(const_dict["test"], "тест");
+  ASSERT_EQ(const_dict["food"], "еда");
+}
+
+TEST_F(DictionaryFixture, OperatorInvalidKey) {
+  ASSERT_THROW(test_dict["привет"], std::invalid_argument);
+  ASSERT_THROW(test_dict["123"], std::invalid_argument);
+}
+
+TEST(DictionaryNonFixture, ConstOperatorInvalidKey) {
+  Dictionary dict;
+  dict += "test:тест";
+  const Dictionary const_dict(dict);
+  ASSERT_THROW(const_dict["привет"], std::invalid_argument);
+}
 TEST_F(DictionaryFixture, ChangeValueOperatorExisting) {
   test_dict["test"] = "тестировать";
   ASSERT_EQ(test_dict["test"], "тестировать");
@@ -109,6 +126,20 @@ TEST_F(DictionaryFixture, AddOperatorCString) {
   ASSERT_EQ(test_dict["inheritance"], "наследование");
   ASSERT_EQ(test_dict.GetSize(), 11);
 }
+TEST_F(DictionaryFixture, AddOperatorInvalidEnglishWord) {
+  ASSERT_THROW(test_dict += "привет:hello", std::invalid_argument);
+  ASSERT_THROW(test_dict += "123test:тест", std::invalid_argument);
+  ASSERT_THROW(test_dict += ":тест", std::invalid_argument);
+}
+TEST_F(DictionaryFixture, AddOperatorInvalidRussianWord) {
+  ASSERT_THROW(test_dict += "hello:hello", std::invalid_argument);
+  ASSERT_THROW(test_dict += "test:123тест", std::invalid_argument);
+  ASSERT_THROW(test_dict += "test:", std::invalid_argument);
+}
+TEST_F(DictionaryFixture, AddOperatorMissingDelimiter) {
+  ASSERT_THROW(test_dict += "helloпривет", std::invalid_argument);
+  ASSERT_THROW(test_dict += "test", std::invalid_argument);
+}
 TEST_F(DictionaryFixture, AddOperatorExtraWord) {
   ASSERT_EQ(test_dict.GetSize(), 8);
   test_dict += "lucky:удача:лаки";
@@ -116,6 +147,23 @@ TEST_F(DictionaryFixture, AddOperatorExtraWord) {
   test_dict += "inheritance:наследование:наследство";
   ASSERT_EQ(test_dict["inheritance"], "наследование");
   ASSERT_EQ(test_dict.GetSize(), 10);
+}
+TEST_F(DictionaryFixture, AddOperatorOverwritesExisting) {
+  ASSERT_EQ(test_dict["test"], "тест");
+  test_dict += "test:испытание";
+  ASSERT_EQ(test_dict["test"], "испытание");
+  ASSERT_EQ(test_dict.GetSize(), 8);
+}
+TEST_F(DictionaryFixture, AddOperatorPairOverwritesExisting) {
+  ASSERT_EQ(test_dict["test"], "тест");
+  test_dict += std::make_pair("test", "экзамен");
+  ASSERT_EQ(test_dict["test"], "экзамен");
+  ASSERT_EQ(test_dict.GetSize(), 8);
+}
+TEST(DictionaryNonFixture, AddOperatorWhitespace) {
+  Dictionary dict;
+  dict += "hello world:привет мир";
+  ASSERT_EQ(dict["hello world"], "привет мир");
 }
 TEST_F(DictionaryFixture, EraseOperatorSTLString) {
   ASSERT_EQ(test_dict.GetSize(), 8);
@@ -134,6 +182,17 @@ TEST_F(DictionaryFixture, EraseOperatorCString) {
   ASSERT_EQ(test_dict.GetSize(), 6);
   test_dict -= "apple";
   ASSERT_EQ(test_dict.GetSize(), 5);
+}
+TEST_F(DictionaryFixture, EraseOperatorNonExisting) {
+  ASSERT_THROW(test_dict -= "nonexistent", std::out_of_range);
+}
+TEST_F(DictionaryFixture, EraseOperatorInvalidWord) {
+  ASSERT_THROW(test_dict -= "привет", std::invalid_argument);
+  ASSERT_THROW(test_dict -= "123", std::invalid_argument);
+}
+TEST(DictionaryNonFixture, EraseFromEmptyDictionary) {
+  Dictionary dict;
+  ASSERT_THROW(dict -= "test", std::out_of_range);
 }
 TEST_F(DictionaryFixture, EqualityOperatorEqualDictionaries) {
   Dictionary dict_to_compare;
@@ -209,6 +268,24 @@ TEST_F(DictionaryFixture, CopyAssignmentOperatorEmpty) {
   test_dict = dict;
   ASSERT_TRUE(dict == test_dict);
   ASSERT_TRUE(test_dict.IsEmpty());
+}
+TEST_F(DictionaryFixture, SelfAssignment) {
+  test_dict = test_dict;
+  ASSERT_EQ(test_dict.GetSize(), 8);
+  ASSERT_EQ(test_dict["test"], "тест");
+}
+TEST_F(DictionaryFixture, CopyConstructorIndependence) {
+  Dictionary dict(test_dict);
+  dict += "new:новый";
+  ASSERT_EQ(dict.GetSize(), 9);
+  ASSERT_EQ(test_dict.GetSize(), 8);
+  ASSERT_FALSE(dict == test_dict);
+}
+TEST_F(DictionaryFixture, CopyAssignmentIndependence) {
+  Dictionary dict;
+  dict = test_dict;
+  dict["test"] = "изменено";
+  ASSERT_NE(dict["test"], test_dict["test"]);
 }
 TEST_F(DictionaryFixture, InputOperator) {
   Dictionary dict;
