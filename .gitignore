@@ -10,3 +10,8 @@ docs/
 # Ignore coverage files
 *.profraw
 *.profdata
+# Ignore CMake files
+CmakeLists.txt
+cmake-build-debug/
+# Ignore Make files
+Makefile
