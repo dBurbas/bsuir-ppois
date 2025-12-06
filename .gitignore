@@ -15,3 +15,7 @@ CmakeLists.txt
 cmake-build-debug/
 # Ignore Make files
 Makefile
+# Ignore coverage directory
+coverage*/
+# Ignore terminal tests
+*terminal_tests*
