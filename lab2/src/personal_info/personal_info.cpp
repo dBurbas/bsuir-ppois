@@ -19,6 +19,14 @@ PersonalInfo::PersonalInfo(const std::string& first_name,
     }
   }
 }
+
+bool PersonalInfo::operator==(const PersonalInfo& other) {
+  return last_name_ == other.last_name_ && first_name_ == other.first_name_ &&
+         middle_name_ == other.middle_name_ && birth_date_ == other.birth_date_;
+}
+bool PersonalInfo::operator!=(const PersonalInfo& other) {
+  return !(*this == other);
+}
 void PersonalInfo::SetBirthDate(const std::string& birth_date) {
   try {
     birth_date_ = Date(birth_date);

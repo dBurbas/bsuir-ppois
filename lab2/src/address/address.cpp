@@ -8,7 +8,7 @@
 
 #include "../exceptions/exceptions.h"
 #include "../utility_functions/utility_functions.h"
-
+// TODO: объединить логики вывода в строку и парсинга строки
 Address::Address(const std::string& oblast, const std::string& city,
                  const std::string& street, const int house,
                  const std::string& country, const std::string& postal_code,

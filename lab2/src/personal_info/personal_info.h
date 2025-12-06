@@ -15,10 +15,13 @@ class PersonalInfo {
   PersonalInfo(const std::string& first_name, const std::string& last_name,
                const std::string& middle_name = "",
                const std::string& birth_date = "");
-  PersonalInfo(const PersonalInfo&) = default;
-  PersonalInfo(PersonalInfo&&) = default;
-  PersonalInfo& operator=(const PersonalInfo&) = default;
-  PersonalInfo& operator=(PersonalInfo&&) = default;
+  PersonalInfo(const PersonalInfo& other) = default;
+  PersonalInfo(PersonalInfo&& other) = default;
+  PersonalInfo& operator=(const PersonalInfo& other) = default;
+  PersonalInfo& operator=(PersonalInfo&& other) = default;
+
+  bool operator==(const PersonalInfo& other);
+  bool operator!=(const PersonalInfo& other);
   ~PersonalInfo() = default;
   void SetFullName(const std::string& first_name, const std::string& last_name,
                    const std::string& middle_name = "") {

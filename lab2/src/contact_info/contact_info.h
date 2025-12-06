@@ -92,6 +92,13 @@ class ContactInfo {
   void SetAddress(const std::string& address) { address_ = Address(address); }
 
   /**
+   * @brief Sets a new address from an Address object
+   * @param address Address object to set
+   * @details Copies an address object to this contact info
+   */
+  void SetAddress(const Address& address) { address_ = address; }
+
+  /**
    * @brief Gets the current email address
    * @return Email address as string
    */
