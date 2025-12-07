@@ -27,6 +27,8 @@ class Address {
    *  @param postal_code Postal code (can be empty).
    *  @param apartment Apartment number (optional, defaults to 0).
    */
+  // TODO: перевести на русский документацию
+  // TODO: добавить этаж в класс
   // TODO: Дописать в доке исключения в конструкторах
   Address(const std::string& oblast, const std::string& city,
           const std::string& street, int house,

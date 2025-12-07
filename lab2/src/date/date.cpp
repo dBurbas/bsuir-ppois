@@ -6,7 +6,7 @@
 
 #include <sstream>
 
-#include "../exceptions/exceptions.h"
+#include "../exceptions/components_exceptions.h"
 void Date::SetFullDate(const int day, const int month, const int year) {
   Validate(day, month, year);
   day_ = day;
@@ -23,12 +23,15 @@ std::string Date::ToString() const {
 void Date::Validate(const int day, const int month, const int year) {
   if (year < kMinYear || year > kMaxYear)
     throw DateException("Invalid date input. Year must be from " +
-                        std::to_string(kMinYear) + " to " +
-                        std::to_string(kMaxYear));
+                            std::to_string(kMinYear) + " to " +
+                            std::to_string(kMaxYear),
+                        day, month, year);
   if (month < 1 || month > 12)
-    throw DateException("Invalid date input. Month must be from 1 to 12");
+    throw DateException("Invalid date input. Month must be from 1 to 12", day,
+                        month, year);
   if (day < 1)
-    throw DateException("Invalid date input. Day cannot be less than 1");
+    throw DateException("Invalid date input. Day cannot be less than 1", day,
+                        month, year);
 
   static const int kDaysInMonth[] = {31, 28, 31, 30, 31, 30,
                                      31, 31, 30, 31, 30, 31};
@@ -39,7 +42,8 @@ void Date::Validate(const int day, const int month, const int year) {
   if (day > max_day) {
     throw DateException(
         "Invalid date input. Day of this month cannot be greater than " +
-        std::to_string(max_day));
+            std::to_string(max_day),
+        day, month, year);
   }
 }
 Date Date::ParseFromString(const std::string& date) {

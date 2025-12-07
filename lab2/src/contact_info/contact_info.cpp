@@ -9,7 +9,7 @@
 #include <regex>
 
 #include "../address/address.h"
-#include "../exceptions/exceptions.h"
+#include "../exceptions/components_exceptions.h"
 #include "../utility_functions/utility_functions.h"
 
 ContactInfo::ContactInfo(const std::string& phone_number,
