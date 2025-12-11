@@ -10,8 +10,8 @@
 #include <optional>
 #include <string>
 
+#include "../../utility_functions/utility_functions.h"
 #include "../address/address.h"
-#include "../utility_functions/utility_functions.h"
 /**
  * @class ContactInfo
  * @brief Stores and validates basic contact information

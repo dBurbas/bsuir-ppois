@@ -7,8 +7,8 @@
 
 #include <string>
 
+#include "../../utility_functions/utility_functions.h"
 #include "../date/date.h"
-#include "../utility_functions/utility_functions.h"
 
 class PersonalInfo {
  public:

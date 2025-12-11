@@ -8,9 +8,9 @@
 #include <optional>
 #include <regex>
 
+#include "../../exceptions/components_exceptions.h"
+#include "../../utility_functions/utility_functions.h"
 #include "../address/address.h"
-#include "../exceptions/components_exceptions.h"
-#include "../utility_functions/utility_functions.h"
 
 ContactInfo::ContactInfo(const std::string& phone_number,
                          const std::string& email,

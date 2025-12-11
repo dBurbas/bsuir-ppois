@@ -3,7 +3,7 @@
 //
 #include "personal_info.h"
 
-#include "../exceptions/components_exceptions.h"
+#include "../../exceptions/components_exceptions.h"
 PersonalInfo::PersonalInfo(const std::string& first_name,
                            const std::string& last_name,
                            const std::string& middle_name,
