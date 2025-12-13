@@ -1,6 +1,6 @@
 /**
  * @file date.h
- * @brief Date representation class with validation and formatting
+ * @brief Класс даты с валидацией и нормализацией
  * @author Dmitry Burbas
  * @date 16/11/2025
  */
@@ -10,108 +10,114 @@
 
 /**
  * @class Date
- * @brief Represents a calendar date with validation and comparison operations
- * @details Supports dates from 1800 to 2100 with DD.MM.YYYY format.
- * Validates day, month, year constraints including leap years.
+ * @brief Представляет собой календарную дату с проверками инвариантов и
+ * операциями сравнения
+ * @details Поддерживает даты от 1800 до 2100 года в формате ДД.ММ.ГГГГ.
+ * Поддерживает инварианты дня, месяца и года, включая проверку с учетом
+ * високосного года.
  */
 class Date {
  public:
   /**
-   * @brief Constructs a Date object with day, month, and year
-   * @param day Day of the month (1-31 depending on month)
-   * @param month Month of the year (1-12)
-   * @param year Year (1800-2100)
-   * @throws DateException if any component is invalid or date doesn't exist
-   * @details Validates date including leap year calculation for February
+   * @brief Конструктор даты через день, месяц и год
+   * @param day День месяца (1-31 в зависимости от месяца и года)
+   * @param month Месяц года (1-12)
+   * @param year Год (1800-2100)
+   * @throws DateException, если любой из элементов даты некорректен или дата
+   * пустая
+   * @details Проверяет дату, включая проверку на високосный год для Февраля
    */
   Date(const int day, const int month, const int year)
       : day_(day), month_(month), year_(year) {
     Validate(day, month, year);
   }
   /**
-   * @brief Constructs a Date object from string representation
-   * @param date Date string in DD.MM.YYYY format
-   * @throws DateException if format is invalid or date components are out of
-   * range
-   * @details Delegates to ParseFromString() then main constructor
+   * @brief Конструктор даты из строки
+   * @param date Строка даты в формате ДД.ММ.ГГГГ
+   * @throws DateException, если формат или элементы даты некорректны
+   * @details Делегирует стандартному конструктору через ParseFromString()
    */
   explicit Date(const std::string& date) : Date(ParseFromString(date)) {}
   /**
-   * @brief Default copy constructor
+   * @brief Конструктор копирования по умолчанию
+   * @param date Объект даты для копирования
    */
-  Date(const Date&) = default;
+  Date(const Date& date) = default;
 
   /**
-   * @brief Default move constructor
+   * @brief Конструктор перемещения по умолчанию
+   * @param date Объект даты для перемещения
    */
-  Date(Date&&) = default;
+  Date(Date&& date) = default;
 
   /**
-   * @brief Default copy assignment operator
-   * @return Reference to this Date object
+   * @brief Оператор присваивания-копирования по умолчанию
+   * @param date Объект даты для копирования
+   * @return Ссылка на этот объект даты
    */
-  Date& operator=(const Date&) = default;
+  Date& operator=(const Date& date) = default;
 
   /**
-   * @brief Default move assignment operator
-   * @return Reference to this Date object
+   * @brief Оператор присваивания-перемещения по умолчанию
+   * @param date Объект даты для перемещения
+   * @return Ссылка на этот объект даты
    */
-  Date& operator=(Date&&) = default;
+  Date& operator=(Date&& date) = default;
 
   /**
-   * @brief Default destructor
+   * @brief Деструктор по умолчанию
    */
   ~Date() = default;
 
   /**
-   * @brief Sets all date components at once with validation
-   * @param day Day of the month (1-31 depending on month)
-   * @param month Month of the year (1-12)
-   * @param year Year (1800-2100)
-   * @throws DateException if any component is invalid
-   * @details Validates the entire date before updating internal state
+   * @brief Устанавливает все элементы даты сразу с валидацией
+   * @param day День месяца (1-31 в зависимости от месяца)
+   * @param month Месяц года (1-12)
+   * @param year Год (1800-2100)
+   * @throws DateException, если любой из элементов не корректен
+   * @details Проверяет всю дату перед обновлением внутреннего состояния(полей)
    */
   void SetFullDate(int day, int month, int year);
 
   /**
-   * @brief Gets the day component
-   * @return Day of the month (1-31)
+   * @brief Получение дня даты
+   * @return День месяца (1-31)
    */
   [[nodiscard]] int GetDay() const { return day_; }
 
   /**
-   * @brief Gets the month component
-   * @return Month of the year (1-12)
+   * @brief Получение месяца даты
+   * @return Месяц года (1-12)
    */
   [[nodiscard]] int GetMonth() const { return month_; }
 
   /**
-   * @brief Gets the year component
-   * @return Year (1800-2100)
+   * @brief Получение года даты
+   * @return Год (1800-2100)
    */
   [[nodiscard]] int GetYear() const { return year_; }
 
   /**
-   * @brief Converts date to string representation
-   * @return Date string in DD.MM.YYYY format with zero-padding
-   * @details Formats single-digit days and months with leading zeros
+   * @brief Преобразование даты в строковое представление
+   * @return Строка даты в формате ДД.ММ.ГГГГ без пробелов
+   * @details Форматирует единичные числа дней и месяцев с ведущими нулями
    */
   [[nodiscard]] std::string ToString() const;
 
   /**
-   * @brief Equality comparison operator
-   * @param other Date to compare with
-   * @return true if all components (day, month, year) are equal
+   * @brief Оператор сравнения равенства
+   * @param other Дата для сравнения
+   * @return true, если все элементы дат одинаковы
    */
   bool operator==(const Date& other) const {
     return day_ == other.day_ && month_ == other.month_ && year_ == other.year_;
   }
 
   /**
-   * @brief Less-than comparison operator
-   * @param other Date to compare with
-   * @return true if this date is chronologically before other
-   * @details Compares year first, then month, then day
+   * @brief Оператор сравнения меньше-чем
+   * @param other Дата для сравнения
+   * @return true, если эта дата хронологически раньше чем other
+   * @details Сравнивает сначала год, потом месяц, потом день
    */
   bool operator<(const Date& other) const {
     if (year_ != other.year_) return year_ < other.year_;
@@ -120,73 +126,74 @@ class Date {
   }
 
   /**
-   * @brief Inequality comparison operator
-   * @param other Date to compare with
-   * @return true if dates are not equal
+   * @brief Оператор сравнения неравенства
+   * @param other Дата для сравнения
+   * @return true, если даты не равны
    */
   bool operator!=(const Date& other) const { return !(*this == other); }
 
   /**
-   * @brief Less-than-or-equal comparison operator
-   * @param other Date to compare with
-   * @return true if this date is before or equal to other
+   * @brief Оператор сравнения меньше-либо-равно
+   * @param other Дата для сравнения
+   * @return true если эта дата хронологически раньше или равна other
    */
   bool operator<=(const Date& other) const {
     return *this < other || *this == other;
   }
 
   /**
-   * @brief Greater-than comparison operator
-   * @param other Date to compare with
-   * @return true if this date is chronologically after other
+   * @brief Оператор сравнения больше-чем
+   * @param other Дата для сравнения
+   * @return true, если эта дата хронологически позже чем other
    */
   bool operator>(const Date& other) const { return !(*this <= other); }
 
   /**
-   * @brief Greater-than-or-equal comparison operator
-   * @param other Date to compare with
-   * @return true if this date is after or equal to other
+   * @brief Оператор сравнения больше-либо-равно
+   * @param other Дата для сравнения
+   * @return true если эта дата хронологически позже или равна other
    */
   bool operator>=(const Date& other) const { return !(*this < other); }
 
  private:
-  static constexpr int kMinYear = 1800;        ///< Minimum valid year
-  static constexpr int kMaxYear = 2100;        ///< Maximum valid year
-  static constexpr char kDateDelimiter = '.';  ///< Delimiter for date format
-  int day_;                                    ///< Day of the month (1-31)
-  int month_;                                  ///< Month of the year (1-12)
-  int year_;                                   ///< Year (1800-2100)
-  // TODO:Перевести на regex если действительно нужно
+  static constexpr int kMinYear = 1800;        ///< Минимальный корректный год
+  static constexpr int kMaxYear = 2100;        ///< Максимальный корректный год
+  static constexpr char kDateDelimiter = '.';  ///< Разделитель для формата даты
+  int day_;                                    ///< День месяца (1-31)
+  int month_;                                  ///< Месяц года (1-12)
+  int year_;                                   ///< Год (1800-2100)
+
   /**
-   * @brief Validates date components
-   * @param day Day to validate (1-31 depending on month)
-   * @param month Month to validate (1-12)
-   * @param year Year to validate (1800-2100)
-   * @throws DateException if year is out of range [1800, 2100]
-   * @throws DateException if month is out of range [1, 12]
-   * @throws DateException if day is less than 1 or exceeds days in month
-   * @details Checks leap years for February (29 days in leap years, 28
-   * otherwise)
+   * @brief Проверка всех элементов даты
+   * @param day День для проверки (1-31 в зависимости от месяца)
+   * @param month Месяц для проверки (1-12)
+   * @param year Год для проверки (1800-2100)
+   * @throws DateException, если год вне отрезка значений [1800,
+   * 2100]
+   * @throws DateException, если месяц вне отрезка значений [1, 12]
+   * @throws DateException, если день меньше 1 или превосходит максимальный день
+   * в месяце
+   * @details Проверяет високосные года для Февраля (29 дней в високосном году,
+   * 28 в остальных)
    */
-  // TODO:перевести на Validator интерфейс
   static void Validate(int day, int month, int year);
 
   /**
-   * @brief Parses date from string in DD.MM.YYYY format
-   * @param date String to parse
-   * @return Parsed Date object
-   * @throws DateException if format doesn't match DD.MM.YYYY
-   * @throws DateException if unexpected characters found after date
-   * @details Uses '.' as delimiter and validates format strictly
+   * @brief Выделяет дату из строки формата ДД.ММ.ГГГГ
+   * @param date Строка для выделения
+   * @return Выделенный объект даты
+   * @throws DateException, если формат не соответствует ДД.ММ.ГГГГ
+   * @throws DateException, если после даты находятся какие-либо еще символы
+   * @details Использует '.' в качестве разделителя и строго проверяет формат
    */
   static Date ParseFromString(const std::string& date);
 
   /**
-   * @brief Determines if a year is a leap year
-   * @param year Year to check
-   * @return true if year is a leap year
-   * @details A year is leap if divisible by 4 but not by 100, or divisible by
-   * 400
+   * @brief Определяет, является ли год високосным
+   * @param year Год для проверки
+   * @return true, если год високосный
+   * @details Високосный год делится на 4 без остатка, но не на 100 или делится
+   * на 400 без остатка
    */
   static bool IsLeapYear(const int year) {
     return (year % 4 == 0 && year % 100 != 0) || (year % 400 == 0);
