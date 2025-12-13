@@ -7,21 +7,22 @@
 
 #include <string>
 
+#include "../../exceptions/components_exceptions.h"
 #include "../../utility_functions/utility_functions.h"
 #include "../date/date.h"
-
+// TODO: документация
 class PersonalInfo {
  public:
   PersonalInfo(const std::string& first_name, const std::string& last_name,
                const std::string& middle_name = "",
-               const std::string& birth_date = "");
+               std::optional<Date> birth_date = std::nullopt);
   PersonalInfo(const PersonalInfo& other) = default;
   PersonalInfo(PersonalInfo&& other) = default;
   PersonalInfo& operator=(const PersonalInfo& other) = default;
   PersonalInfo& operator=(PersonalInfo&& other) = default;
 
-  bool operator==(const PersonalInfo& other);
-  bool operator!=(const PersonalInfo& other);
+  bool operator==(const PersonalInfo& other) const;
+  bool operator!=(const PersonalInfo& other) const;
   ~PersonalInfo() = default;
   void SetFullName(const std::string& first_name, const std::string& last_name,
                    const std::string& middle_name = "") {
@@ -40,8 +41,10 @@ class PersonalInfo {
   [[nodiscard]] std::string GetLastName() const { return last_name_; }
   [[nodiscard]] std::string GetFirstName() const { return first_name_; }
   [[nodiscard]] std::string GetMiddleName() const { return middle_name_; }
-  [[nodiscard]] std::string GetBirthDate() const {
-    return birth_date_ != std::nullopt ? birth_date_->ToString() : "";
+  [[nodiscard]] const Date& GetBirthDate() const {
+    if (birth_date_ == std::nullopt)
+      throw PersonalInfoException("No date in this personal info");
+    return *birth_date_;
   }
 
  private:

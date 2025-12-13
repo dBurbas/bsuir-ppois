@@ -8,49 +8,36 @@
 
 #include "../../exceptions/components_exceptions.h"
 #include "../../utility_functions/utility_functions.h"
-// TODO: объединить логики вывода в строку и парсинга строки
-Address::Address(const std::string& oblast, const std::string& city,
-                 const std::string& street, const int house,
-                 const std::string& country, const std::string& postal_code,
-                 const int apartment) {
-  const std::string normalized_oblast = NormalizeOblast(oblast);
-  const std::string normalized_city = NormalizeCity(city);
-  const std::string normalized_street = NormalizeStreet(street);
+
+Address::Address(const std::string& country, const std::string& oblast,
+                 const std::string& city, const std::string& street,
+                 const int house, const int apartment,
+                 const std::string& postal_code) {
   const std::string normalized_country = NormalizeCountry(country);
-  const std::string normalized_postal = NormalizePostalCode(postal_code);
+  ValidateCountry(normalized_country);
+  const std::string normalized_oblast = NormalizeOblast(oblast);
   ValidateOblast(normalized_oblast);
+  const std::string normalized_city = NormalizeCity(city);
   ValidateCity(normalized_city);
+  const std::string normalized_street = NormalizeStreet(street);
   ValidateStreet(normalized_street);
-  ValidatePostalCode(normalized_postal, normalized_country);
+  const std::string normalized_postal = NormalizePostalCode(postal_code);
+  ValidatePostalCode(normalized_country, normalized_postal);
+
   ValidateHouse(house);
   ValidateApartment(apartment);
+  country_ = normalized_country;
   oblast_ = normalized_oblast;
   city_ = normalized_city;
   street_ = normalized_street;
   house_ = house;
-  country_ = normalized_country;
   postal_code_ = normalized_postal;
   apartment_ = apartment;
 }
-Address::Address(const std::string& full_address) {
-  std::vector<std::string> parts = Utility::Split(full_address, ';');
-  if (parts.size() < 4) {
-    throw AddressException(
-        "Address error: not enough parts in string. Expected format: "
-        "Oblast;City;Street;House;(optional->)Country;Postal Code;Apartment");
-  }
-  const std::string oblast = parts[0];
-  const std::string city = parts[1];
-  const std::string street = parts[2];
-  const int house = std::stoi(parts[3]);
-  const std::string country = parts.size() > 4 ? parts[4] : "Belarus";
-  const std::string postal_code = parts.size() > 5 ? parts[5] : "";
-  const int apartment = parts.size() > 6 ? std::stoi(parts[6]) : 0;
-  *this = Address(oblast, city, street, house, country, postal_code, apartment);
-}
+
 void Address::SetPostalCode(const std::string& postal_code) {
   const std::string normalized = NormalizePostalCode(postal_code);
-  ValidatePostalCode(normalized, country_);
+  ValidatePostalCode(country_, normalized);
   postal_code_ = normalized;
 }
 
@@ -87,16 +74,16 @@ void Address::SetApartment(const int apartment) {
 }
 std::string Address::ToString() const {
   std::string result;
-  if (!country_.empty()) result += country_;
-  result += (result.empty() ? "" : ", ") + oblast_;
-  result += (result.empty() ? "" : ", ") + city_;
-  result += (result.empty() ? "" : ", ") + street_;
-  result += (result.empty() ? "" : " ") + std::to_string(house_);
+  result += country_;
+  result += (result.empty() ? "" : ";") + oblast_;
+  result += (result.empty() ? "" : ";") + city_;
+  result += (result.empty() ? "" : ";") + street_;
+  result += (result.empty() ? "" : ";") + std::to_string(house_);
   if (apartment_ > 0) {
-    result += ", apt. " + std::to_string(apartment_);
+    result += ";" + std::to_string(apartment_);
   }
   if (!postal_code_.empty()) {
-    result += ", " + postal_code_;
+    result += ";" + postal_code_;
   }
   return result;
 }
@@ -105,10 +92,7 @@ std::string Address::GetPostalCode() const {
     throw AddressException("No postal code in this address.");
   return postal_code_;
 }
-std::string Address::GetCountry() const {
-  if (country_.empty()) throw AddressException("No country in this address.");
-  return country_;
-}
+std::string Address::GetCountry() const { return country_; }
 std::string Address::GetOblast() const { return oblast_; }
 std::string Address::GetCity() const { return city_; }
 std::string Address::GetStreet() const { return street_; }
@@ -117,13 +101,27 @@ int Address::GetApartmentNumber() const {
   if (apartment_ == 0) throw AddressException("No apartment in this address.");
   return apartment_;
 }
-
+const Address& Address::ParseFromString(const std::string& full_address) {
+  std::vector<std::string> parts = Utility::Split(full_address, ';');
+  if (parts.size() < 5) {
+    throw AddressException(
+        "Address error: not enough parts in string. Expected format: "
+        "Country;Oblast;City;Street;House;(optional->)Apartment;Postal Code");
+  }
+  const std::string& country = parts[0];
+  const std::string& oblast = parts[1];
+  const std::string& city = parts[2];
+  const std::string& street = parts[3];
+  const int house = std::stoi(parts[4]);
+  const int apartment = parts.size() > 5 ? std::stoi(parts[5]) : 0;
+  const std::string& postal_code = parts.size() > 6 ? parts[6] : "";
+  return Address(country, oblast, city, street, house, apartment, postal_code);
+}
 std::string Address::NormalizePostalCode(const std::string& postal_code) {
   return Utility::DeleteWhitespaces(postal_code);
 }
 std::string Address::NormalizeCountry(const std::string& country) {
-  std::string result = Utility::Trim(country);
-  return result.empty() ? "Belarus" : result;
+  return Utility::Trim(country);
 }
 std::string Address::NormalizeOblast(const std::string& oblast) {
   return Utility::Trim(oblast);
@@ -134,8 +132,8 @@ std::string Address::NormalizeCity(const std::string& city) {
 std::string Address::NormalizeStreet(const std::string& street) {
   return Utility::Trim(street);
 }
-void Address::ValidatePostalCode(const std::string& postal_code,
-                                 const std::string& country) {
+void Address::ValidatePostalCode(const std::string& country,
+                                 const std::string& postal_code) {
   if (postal_code.empty()) return;
   std::regex pattern(R"(^[A-Za-z0-9\- ]{2,10}$)");
   if (country == "Belarus" || country == "BY") {
@@ -145,6 +143,10 @@ void Address::ValidatePostalCode(const std::string& postal_code,
     throw AddressException("Address error: invalid postal code: " +
                            postal_code);
   }
+}
+void Address::ValidateCountry(const std::string& country) {
+  if (country.empty())
+    throw AddressException("Address error: country is required");
 }
 void Address::ValidateOblast(const std::string& oblast) {
   if (oblast.empty())

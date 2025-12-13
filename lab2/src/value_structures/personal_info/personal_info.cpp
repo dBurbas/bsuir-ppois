@@ -7,32 +7,26 @@
 PersonalInfo::PersonalInfo(const std::string& first_name,
                            const std::string& last_name,
                            const std::string& middle_name,
-                           const std::string& birth_date) {
+                           std::optional<Date> birth_date) {
   UpdateFirstAndLastName(first_name, last_name);
+  birth_date_ = birth_date;
   middle_name_ = Utility::Trim(middle_name);
-  if (!birth_date.empty()) {
-    try {
-      birth_date_ = Date(birth_date);
-    } catch (const DateException& date_exception) {
-      throw PersonalInfoException(std::string("Personal info error: ") +
-                                  date_exception.what());
-    }
-  }
 }
 
-bool PersonalInfo::operator==(const PersonalInfo& other) {
+bool PersonalInfo::operator==(const PersonalInfo& other) const {
   return last_name_ == other.last_name_ && first_name_ == other.first_name_ &&
          middle_name_ == other.middle_name_ && birth_date_ == other.birth_date_;
 }
-bool PersonalInfo::operator!=(const PersonalInfo& other) {
+bool PersonalInfo::operator!=(const PersonalInfo& other) const {
   return !(*this == other);
 }
 void PersonalInfo::SetBirthDate(const std::string& birth_date) {
   try {
     birth_date_ = Date(birth_date);
   } catch (const DateException& date_exception) {
-    throw PersonalInfoException(std::string("Personal info error: ") +
-                                date_exception.what());
+    throw PersonalInfoException(
+        std::string("Personal info birth date error: ") +
+        date_exception.what());
   }
 }
 [[nodiscard]] std::string PersonalInfo::GetFullName() const {
@@ -55,8 +49,8 @@ void PersonalInfo::UpdateLastName(const std::string& last_name) {
 void PersonalInfo::UpdateFirstAndLastName(const std::string& first_name,
                                           const std::string& last_name) {
   const std::string trimmed_first = Utility::Trim(first_name);
-  const std::string trimmed_last = Utility::Trim(last_name);
   ValidateFirstName(trimmed_first);
+  const std::string trimmed_last = Utility::Trim(last_name);
   ValidateLastName(trimmed_last);
   first_name_ = trimmed_first;
   last_name_ = trimmed_last;

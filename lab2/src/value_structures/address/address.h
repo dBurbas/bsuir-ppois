@@ -1,6 +1,6 @@
 /**
  * @file address.h
- * @brief Base class for documents
+ * @brief
  * @author Dmitry Burbas
  * @date 16/11/2025
  */
@@ -23,17 +23,15 @@ class Address {
    *  @param city Name of the city.
    *  @param street Name of the street.
    *  @param house House number.
-   *  @param country Country name (defaults to "Belarus").
+   *  @param country Country name
    *  @param postal_code Postal code (can be empty).
    *  @param apartment Apartment number (optional, defaults to 0).
+   *  @throws AddressException, если любой из элементов не корректен
    */
   // TODO: перевести на русский документацию
-  // TODO: добавить этаж в класс
-  // TODO: Дописать в доке исключения в конструкторах
-  Address(const std::string& oblast, const std::string& city,
-          const std::string& street, int house,
-          const std::string& country = "Belarus",
-          const std::string& postal_code = "", int apartment = 0);
+  Address(const std::string& country, const std::string& oblast,
+          const std::string& city, const std::string& street, int house,
+          int apartment = 0, const std::string& postal_code = "");
 
   /*!
    *  @brief Constructs an Address from a full address string.
@@ -41,7 +39,9 @@ class Address {
    *  (country, region, city, street, house, apartment and postal code).
    *  @param full_address Full address string to be parsed.
    */
-  explicit Address(const std::string& full_address);
+  explicit Address(const std::string& full_address) {
+    *this = ParseFromString(full_address);
+  }
 
   /*!
    *  @brief Sets the postal code.
@@ -140,7 +140,9 @@ class Address {
   std::string city_;         ///< City name.
   std::string street_;       ///< Street name.
   int house_;                ///< House number.
-  int apartment_;            ///< Apartment number.
+  int apartment_ = 0;        ///< Apartment number.
+
+  static const Address& ParseFromString(const std::string& full_address);
 
   /*!
    *  @brief Normalizes a postal code string.
@@ -151,13 +153,12 @@ class Address {
   static std::string NormalizePostalCode(const std::string& postal_code = "");
 
   /*!
-   *  @brief Normalizes a country name.
-   *  @details Trims whitespaces.(can be expanded)
-   *  @param country Original country name (defaults to "Belarus" due to
-   * regional orientation of project).
-   *  @return Normalized country name.
+   *  @brief Normalizes a country name
+   *  @details Trims whitespaces (can be expanded)
+   *  @param country Original country name
+   *  @return Normalized country name
    */
-  static std::string NormalizeCountry(const std::string& country = "Belarus");
+  static std::string NormalizeCountry(const std::string& country);
 
   /*!
    *  @brief Normalizes a region (oblast) name.
@@ -191,8 +192,11 @@ class Address {
    *  @param postal_code Postal code to validate (can be empty).
    *  @param country Country for which the postal code is validated.
    */
-  static void ValidatePostalCode(const std::string& postal_code = "",
-                                 const std::string& country = "Belarus");
+  static void ValidatePostalCode(const std::string& country,
+                                 const std::string& postal_code = "");
+
+  static void ValidateCountry(const std::string& country);
+
   /*!
    *  @brief Validates the region (oblast) name.
    *  @details Checks that the oblast is not empty (can be expanded)
