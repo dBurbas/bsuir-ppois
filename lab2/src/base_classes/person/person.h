@@ -5,16 +5,26 @@
 #ifndef PERSON_H
 #define PERSON_H
 
-#include "../../contact_info/contact_info.h"
-#include "../../exceptions/exceptions.h"
-#include "../../personal_info/personal_info.h"
+#include "../../exceptions/components_exceptions.h"
+#include "../../exceptions/dean_office_exceptions.h"
+#include "../../value_structures/contact_info/contact_info.h"
+#include "../../value_structures/personal_info/personal_info.h"
+
 // TODO: make docs and some tuning
 class Person {
  public:
   Person(const PersonalInfo& personal_info, const ContactInfo& contact_info)
-      : personal_info_(personal_info), contact_info_(contact_info) {}
+      : personal_info_(personal_info), contact_info_(contact_info) {
+    try {
+      personal_info_.GetBirthDate();
+    } catch (const PersonalInfoException& e) {
+      throw PersonException("No birth date for person:" +
+                            std::string(e.what()));
+    }
+  }
   virtual ~Person() = default;
   void SetEmail(const std::string& email) {
+    // TODO: убрать этот try-catch(нет смысла) или перевести на nested_exception
     try {
       contact_info_.SetEmail(email);
     } catch (const ContactInfoException& e) {
@@ -38,8 +48,8 @@ class Person {
     return personal_info_.GetFullName();
   }
 
-  [[nodiscard]] std::string GetBirthDate() const {
-    return personal_info_.GetBirthDate();
+  [[nodiscard]] std::string GetBirthDateString() const {
+    return personal_info_.GetBirthDate().ToString();
   }
 
   [[nodiscard]] std::string GetEmail() const {
