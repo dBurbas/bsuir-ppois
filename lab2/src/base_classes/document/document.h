@@ -1,6 +1,6 @@
 /**
  * @file document.h
- * @brief Base class for documents
+ * @brief Базовый класс для документов
  * @author Dmitry Burbas
  * @date 16/11/2025
  */
@@ -9,64 +9,85 @@
 #include <string>
 
 #include "../../base_classes/person/person.h"
-#include "../../date/date.h"
+#include "../../value_structures/date/date.h"
+
 /*! @class Document
- *  @brief Abstract base class for all documents.
- *  @details Describes the common interface of a document: number, issue date,
- *  owner, and signature state. Intended to be inherited by concrete document
- *  types.
+ *  @brief Абстрактный базовый класс для всех документов.
+ *  @details Описывает общий интерфейс для документов: имя, дата выдачи
+ *  и состояния подписания. Предназначен для наследования конкретными типами
+ *  документов
  */
 class Document {
  public:
   /*!
-   *  @brief Document constructor.
-   *  @param number Unique document number.
-   *  @param issue_date Document issue date.
-   *  @param owner Reference to the document owner.
+   *  @brief Конструктор документа
+   *  @param name Уникальное имя документа
+   *  @param issue_date Дата выдачи(создания) документа
    */
-  Document(std::string number, const Date& issue_date, Person& owner)
-      : number_(std::move(number)), issue_date_(issue_date), owner_(owner) {}
+  Document(std::string name, const Date& issue_date)
+      : name_(std::move(name)), issue_date_(issue_date) {}
   /*!
-   *  @brief Virtual destructor.
-   *  @details Ensures proper destruction of derived class objects when deleted
-   *  through a pointer to the base class Document.
+   *  @brief Виртуальный деструктор
+   *  @details Гарантировать правильное разрушение всех наследников при удалении
+   * через указатель на базовый класс документа
    */
   virtual ~Document() = default;
+
   /*!
-   *  @brief Returns the document number.
-   *  @return A string containing the unique document number.
+   *  @brief Возвращает название документа
+   *  @return Строка содержащая уникальное имя документа
    */
-  [[nodiscard]] std::string GetNumber() const { return number_; }
+  [[nodiscard]] const std::string& GetName() const { return name_; }
+
   /*!
-   *  @brief Returns the document issue date.
-   *  @return Date object representing the document issue date.
+   *  @brief Возвращает дату выдачи(создания документа)
+   *  @return Date объект представляющий дату выдачи документа
    */
-  [[nodiscard]] Date GetIssueDate() const { return issue_date_; }
+  [[nodiscard]] const Date& GetIssueDate() const { return issue_date_; }
+
   /*!
-   *  @brief Returns the document owner.
-   *  @return Constant reference to a Person object representing the owner.
-   */
-  [[nodiscard]] const Person& GetOwner() const { return owner_; }
-  /*!
-   *  @brief Checks whether the document is signed.
-   *  @return True if the document is signed, otherwise false.
+   *  @brief Проверяет подписан ли уже документ
+   *  @return True, если документ подписан, в ином случае false
    */
   [[nodiscard]] bool IsSigned() const { return is_signed_; }
 
   /*!
-   *  @brief Signs the document.
-   *  @details Pure virtual function that must be implemented in derived
-   *  classes. The signing logic may include role checks, permission checks,
-   *  and modifications of the internal document state.
-   *  @param signer Reference to a Person object acting as the signer.
+   *  @brief Подписание документа
+   *  @details Подписывает документ, если он уже не подписан и если подписант
+   *  обладает правами доступа
+   *  @param signer Ссылка на объект Person, выступающего в роли подписанта
    */
-  virtual void SignDocument(Person& signer) = 0;
+  void Sign(const Person& signer) {
+    if (is_signed_)
+      throw DocumentException("Document " + name_ + " already signed");
+    if (!CheckSignerAccess(signer))
+      throw DocumentException(
+          "Signer is not authorised for this document type");
+    OnSigning(signer);
+    is_signed_ = true;
+  }
 
  protected:
-  bool is_signed_ = false;  ///< Flag indicating the document is signed.
-  std::string number_;      ///< Unique document number.
-  Date issue_date_;         ///< Document issue date.
-  Person& owner_;           ///< Reference to the document owner.
+  /*!
+   *  @brief Проверка доступа к подписанию человека
+   *  @details Чисто виртуальный метод который нужно реализовать всем
+   * наследникам
+   *  @param signer Ссылка на объект Person, выступающего в роли подписанта
+   *  @return True, если человек имеет нужные права доступа, в ином случае false
+   */
+  [[nodiscard]] virtual bool CheckSignerAccess(const Person& signer) const = 0;
+
+  /*!
+   *  @brief Действие, выполняющееся при подписании
+   *  @details Виртуальный метод, который могут реализовать наследники
+   *  @param signer Ссылка на объект Person, выступающего в роли подписанта
+   */
+  virtual void OnSigning(const Person& signer) { (void)signer; };
+
+ private:
+  std::string name_;        ///< Уникальное имя документа
+  Date issue_date_;         ///< Дата выдачи документа
+  bool is_signed_ = false;  ///< Флаг, указывающий на то, что документ подписан
 };
 
 #endif  // DOCUMENT_H
