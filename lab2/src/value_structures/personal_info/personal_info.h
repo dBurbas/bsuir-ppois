@@ -148,7 +148,7 @@ class PersonalInfo {
    * @throw PersonalInfoException Если дата рождения не задана
    */
   [[nodiscard]] const Date& GetBirthDate() const {
-    if (birth_date_ == std::nullopt)
+    if (!birth_date_)
       throw PersonalInfoException("No date in this personal info");
     return *birth_date_;
   }
