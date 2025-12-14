@@ -6,10 +6,13 @@
  */
 #ifndef ORDER_H
 #define ORDER_H
+#include <memory>
+
+#include "../../exceptions/dean_office_exceptions.h"
 #include "../document/document.h"
 
 /*! @class Order
- *  @brief Абстрактный базовый класс для всех документов.
+ *  @brief Абстрактный базовый класс для всех приказов.
  *  @details Описывает общую реализацию для приказов: основание приказа, дата
  * вступления в силу. Наследуется от документа
  */
@@ -21,17 +24,19 @@ class Order : public Document {
    *  @param issue_date Дата выдачи(создания) приказа
    *  @param foundation Основание приказа(документ)
    *  @param effective_date Дата вступления приказа в силу
-   *  @throw OrderException, если нет основания для приказа или дата вступления
-   * в силу раньше чем дата выдачи приказа
+   *  @throw OrderFoundationException, если нет основания для приказа или дата
+   * вступления в силу раньше чем дата выдачи приказа
    */
   Order(std::string name, const Date& issue_date,
         std::shared_ptr<const Document> foundation, const Date& effective_date)
       : Document(std::move(name), issue_date),
         foundation_document_(std::move(foundation)),
         effective_date_(effective_date) {
-    if (!foundation_document_) throw OrderException("No order foundation");
-    if (effective_date < issue_date)
-      throw OrderException("Effective date cannot be earlier than issue date");
+    if (!foundation_document_)
+      throw OrderArgumentsException("No order foundation");
+    if (effective_date_ < issue_date)
+      throw OrderArgumentsException(
+          "Effective date cannot be earlier than issue date");
   }
 
   /*!

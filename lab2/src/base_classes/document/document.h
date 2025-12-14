@@ -9,6 +9,7 @@
 #include <string>
 
 #include "../../base_classes/person/person.h"
+#include "../../exceptions/dean_office_exceptions.h"
 #include "../../value_structures/date/date.h"
 
 /*! @class Document
