@@ -12,7 +12,6 @@
 #include "../../value_structures/contact_info/contact_info.h"
 #include "../../value_structures/personal_info/personal_info.h"
 
-// TODO: поправить исключения и (подумать над try-catch мб nested_exception)
 /*! @class Person
  *  @brief Абстрактный базовый класс для всех людей.
  *  @details Описывает общий интерфейс для людей: личная информация(ФИО, день
@@ -26,15 +25,15 @@ class Person {
    *  @brief Конструктор человека
    *  @param personal_info Личная информация человека
    *  @param contact_info Контактная информация человека
-   *  @throw PersonException, если нет дня рождения человека
+   *  @throw PersonComponentException, если нет дня рождения человека
    */
   Person(const PersonalInfo& personal_info, const ContactInfo& contact_info)
       : personal_info_(personal_info), contact_info_(contact_info) {
     try {
-      personal_info_.GetBirthDate();
+      (void)personal_info_.GetBirthDate();
     } catch (const PersonalInfoException& e) {
-      throw PersonException("No birth date for person:" +
-                            std::string(e.what()));
+      throw PersonComponentException("No birth date for person:" +
+                                     std::string(e.what()));
     }
   }
   /*!
@@ -48,13 +47,14 @@ class Person {
    *  @brief Установка адреса электронной почты человека
    *  @param email Строка представляющая собой адрес электронной почты
    *  @details Делегирует реализацию полю контактной информации
-   *  @throw PersonException, пробрасывает исключение контактной информации
+   *  @throw PersonComponentException, пробрасывает исключение контактной
+   * информации
    */
   void SetEmail(const std::string& email) {
     try {
       contact_info_.SetEmail(email);
     } catch (const ContactInfoException& e) {
-      throw PersonException("Person error:" + std::string(e.what()));
+      throw PersonComponentException("Person error:" + std::string(e.what()));
     }
   }
 
@@ -62,13 +62,14 @@ class Person {
    *  @brief Установка номера телефона человека
    *  @param phone_number Строка представляющая собой номер телефона
    *  @details Делегирует реализацию полю контактной информации
-   *  @throw PersonException, пробрасывает исключение контактной информации
+   *  @throw PersonComponentException, пробрасывает исключение контактной
+   * информации
    */
   void SetPhoneNumber(const std::string& phone_number) {
     try {
       contact_info_.SetPhoneNumber(phone_number);
     } catch (const ContactInfoException& e) {
-      throw PersonException("Person error:" + std::string(e.what()));
+      throw PersonComponentException("Person error:" + std::string(e.what()));
     }
   }
 
