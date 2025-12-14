@@ -161,7 +161,7 @@ class Address {
    *  @throw AddressException, если формат данной строки некорректен(не хватает
    * элементов)
    */
-  static const Address& ParseFromString(const std::string& full_address);
+  static Address ParseFromString(const std::string& full_address);
 
   /*!
    *  @brief Нормализует строку почтового индекса

@@ -101,7 +101,7 @@ int Address::GetApartmentNumber() const {
   if (apartment_ == 0) throw AddressException("No apartment in this address.");
   return apartment_;
 }
-const Address& Address::ParseFromString(const std::string& full_address) {
+Address Address::ParseFromString(const std::string& full_address) {
   std::vector<std::string> parts = Utility::Split(full_address, ';');
   if (parts.size() < 5) {
     throw AddressException(
@@ -112,10 +112,17 @@ const Address& Address::ParseFromString(const std::string& full_address) {
   const std::string& oblast = parts[1];
   const std::string& city = parts[2];
   const std::string& street = parts[3];
-  const int house = std::stoi(parts[4]);
-  const int apartment = parts.size() > 5 ? std::stoi(parts[5]) : 0;
+  int house = 0;
+  int apartment = 0;
+  try {
+    house = std::stoi(parts[4]);
+    apartment = parts.size() > 5 ? std::stoi(parts[5]) : 0;
+  } catch (const std::exception& e) {
+    throw AddressException(
+        std::string("Address error: invalid number field: ") + e.what());
+  }
   const std::string& postal_code = parts.size() > 6 ? parts[6] : "";
-  return Address(country, oblast, city, street, house, apartment, postal_code);
+  return {country, oblast, city, street, house, apartment, postal_code};
 }
 std::string Address::NormalizePostalCode(const std::string& postal_code) {
   return Utility::DeleteWhitespaces(postal_code);
