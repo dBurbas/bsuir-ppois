@@ -92,7 +92,7 @@ class Address {
    *  @brief Устанавливает номер квартиры
    *  @param apartment Новый номер квартиры
    *  @details Нормализует, валидирует и устанавливает квартиру.
-   *  @throw AddressException, если данный номер меньше либо равен 0
+   *  @throw AddressException, если данный номер меньше 0
    */
   void SetApartment(int apartment);
 

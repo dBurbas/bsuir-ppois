@@ -42,6 +42,7 @@ void Address::SetPostalCode(const std::string& postal_code) {
 }
 
 void Address::SetCountry(const std::string& country) {
+  ValidateCountry(country);
   country_ = NormalizeCountry(country);
 }
 

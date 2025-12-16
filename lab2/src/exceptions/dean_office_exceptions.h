@@ -6,8 +6,6 @@
  */
 #ifndef DEAN_OFFICE_EXCEPTIONS_H
 #define DEAN_OFFICE_EXCEPTIONS_H
-// TODO: поменять названия исключений и добавить конкретные например "Нет даты
-// рождения человека"
 
 #include "base_exception.h"
 /**
@@ -23,6 +21,17 @@ class DeanOfficeException : public BaseException {
   using BaseException::BaseException;  ///< Наследование конструкторов
 };
 
+/**
+ * @class DepartmentException
+ * @brief Класс исключений для некорректных операций с Department
+ * @details Выбрасывается когда добавляется например пустое имя для Department и
+ * т.д.
+ */
+class DepartmentException : public DeanOfficeException {
+ public:
+  using DeanOfficeException::DeanOfficeException;  ///< Наследование
+                                                   ///< конструкторов
+};
 /**
  * @class PersonComponentException
  * @brief Класс исключений для некорректных операций с Person
@@ -46,6 +55,17 @@ class EmployeeException : public DeanOfficeException {
   using DeanOfficeException::DeanOfficeException;  ///< Наследование
                                                    ///< конструкторов
 };
+/**
+ * @class DocentException
+ * @brief Класс исключений для некорректных операций с Docent
+ * @details Выбрасывается при некорректных операциях доцента
+ */
+class DocentException : public DeanOfficeException {
+ public:
+  using DeanOfficeException::DeanOfficeException;  ///< Наследование
+                                                   ///< конструкторов
+};
+
 /**
  * @class StudentException
  * @brief Класс исключений для некорректных операций с Student
@@ -129,12 +149,81 @@ class SubjectException : public DeanOfficeException {
 /**
  * @class EventException
  * @brief Класс исключений для некорректных операций с событиями
- * @details Выбрасывается при некорректных операциях с Event, например дата
- * начала позже даты конца и т.п.
+ * @details Выбрасывается при некорректных операциях с Event, например имя
+ * пустое или продолжительность не положительная
  */
 class EventException : public DeanOfficeException {
  public:
   using DeanOfficeException::DeanOfficeException;  ///< Наследование
+                                                   ///< конструкторов
+};
+/**
+ * @class LessonException
+ * @brief Класс исключений для некорректных операций с занятиями
+ * @details Выбрасывается при некорректных операциях с Lesson, например пустая
+ * группа
+ */
+class LessonException : public DeanOfficeException {
+ public:
+  using DeanOfficeException::DeanOfficeException;  ///< Наследование
   ///< конструкторов
+};
+
+/**
+ * @class GradeException
+ * @brief Класс исключений для некорректных операций с оценками
+ * @details Выбрасывается при некорректных операциях с Grade (неустановленный
+ * предмет)
+ */
+class GradeException : public DeanOfficeException {
+ public:
+  using DeanOfficeException::DeanOfficeException;  ///< Наследование
+                                                   ///< конструкторов
+};
+/**
+ * @class NumericGradeException
+ * @brief Класс исключений для некорректных операций с численными оценками
+ * @details Выбрасывается при некорректных операциях с NumericGrade(оценка <= 0)
+ */
+class NumericGradeException : public GradeException {
+ public:
+  using GradeException::GradeException;  ///< Наследование
+                                         ///< конструкторов
+};
+
+/**
+ * @class AssessmentException
+ * @brief Класс исключений для некорректных операций с контролем знаний
+ * @details Выбрасывается при некорректных операциях с Assessment, например
+ * продолжительность не положительная или отсутствует предмет для контроля
+ */
+class AssessmentException : public DeanOfficeException {
+ public:
+  using DeanOfficeException::DeanOfficeException;  ///< Наследование
+                                                   ///< конструкторов
+};
+
+/**
+ * @class GroupException
+ * @brief Класс исключений для некорректных операций с группой студентов
+ * @details Выбрасывается при некорректных операциях с Group, например
+ * пустой id
+ */
+class GroupException : public DeanOfficeException {
+ public:
+  using DeanOfficeException::DeanOfficeException;  ///< Наследование
+                                                   ///< конструкторов
+};
+
+/**
+ * @class SpecialityException
+ * @brief Класс исключений для некорректных операций со специальностью
+ * @details Выбрасывается при некорректных операциях с Speciality, например
+ * пустой шифр или имя
+ */
+class SpecialityException : public DeanOfficeException {
+ public:
+  using DeanOfficeException::DeanOfficeException;  ///< Наследование
+                                                   ///< конструкторов
 };
 #endif  // DEAN_OFFICE_EXCEPTIONS_H
